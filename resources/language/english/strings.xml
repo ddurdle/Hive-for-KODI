@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strings>
+    <string id="30000">Hive</string>
+    <string id="30001">Username</string>
+    <string id="30002">Password</string>
+    <string id="30003">Domain</string>
+	<string id="30004">User Agent</string>
+    <string id="30005">Save Authorization Session Information (speed up plugin)</string>
+    <string id="30006">Playback Type</string>
+    <string id="30007">Protocol</string>
+    <string id="30008">Login</string>
+    <string id="30009">Playback</string>
+    <string id="30011">Cache Folder</string>
+    <string id="30012">Cache Folder (custom)</string>
+    <string id="30013">Quick Playback Links (fast but links are not persistent)</string>
+    <string id="30014">Wait for ...</string>
+    <string id="30019">Seconds</string>
+    <string id="30015">Set the Username and Password in addon settings before running.</string>
+    <string id="30016">You must add org.python.pydev.debug.pysrc to your PYTHONPATH.</string>
+    <string id="30017">Login information is incorrect or permission is denied</string>
+    <string id="30018">Clear Authorization Keys + Cookies</string>
+    <string id="30020">General</string>
+    <string id="30021">Accounts</string>
+    <string id="30022">Change to Modify Matching Account Record</string>
+    <string id="30023">Cleared all authorization keys and cookies.</string>
+    <string id="30024">Library</string>
+    <string id="30025">Generate Public STRMs</string>
+    <string id="30026">Location to Store STRMs</string>
+    <string id="30027">Do you want to create the STRM files in the path</string>
+    <string id="30028">STRM file creation complete.</string>
+    <string id="30030">Login Details for Account</string>
+    <string id="30031">Play...</string>
+    <string id="30032">Download...</string>
+    <string id="30033">Choose a stream</string>
+    <string id="30034">Files</string>
+    <string id="30035">Downloading...</string>
+    <string id="30036">Building STRMs...</string>
+    <string id="30037">Downloading...</string>
+    <string id="30038">Would you like to save that a default?</string>
+    <string id="30039">Add another account</string>
+    <string id="30042">Generate Non-public STRM</string>
+    <string id="30043">Options</string>
+    <string id="30044">Parameter is missing:</string>
+    <string id="30045">Error fetching from cloud service.</string>
+    <string id="30046">Watch Stream</string>
+    <string id="30047">Download and Watch</string>
+    <string id="30048">Watch AJAX Stream</string>
+    <string id="30049">Something went wrong.</string>
+    <string id="30050">The value was not able to set:</string>
+
+</strings>
