@@ -68,7 +68,10 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
 
-    url = PLUGIN_URL+'?mode=video&title='+package.file.title+'&filename='+package.file.id
+    url = package.getMediaURL()
+    cleanURL = re.sub('---', '', url)
+    cleanURL = re.sub('&', '---', cleanURL)
+    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
 
 
 #    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
@@ -314,7 +317,7 @@ if mode == 'main' or mode == 'folder':
         try:
             oc
         except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30049), addon.getLocalizedString(30050), 'oc')
             log(aaddon.getLocalizedString(30050)+ 'oc', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
@@ -392,7 +395,7 @@ elif mode == 'video' or mode == 'audio':
     try:
             oc
     except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30049), addon.getLocalizedString(30050), 'oc')
             log(aaddon.getLocalizedString(30050)+ 'oc', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
@@ -450,18 +453,11 @@ elif mode == 'streamurl':
     try:
             oc
     except NameError:
-            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'oc')
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30049), addon.getLocalizedString(30050), 'oc')
             log(aaddon.getLocalizedString(30050)+ 'oc', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
-
-    mediaFile = file.file('', '', '', 0, '','')
-    mediaFolder = folder.folder('','')
-    media = package.package(mediaFile,mediaFolder)
-    cleanURL = re.sub('---', '&', url)
-
-    media.setMediaURL(mediaurl.mediaurl(cleanURL,'','',''))
-    url = oc.getPlaybackCall(0,media)
+    url = re.sub('---', '&', url)
 
     item = xbmcgui.ListItem(path=url)
     item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
