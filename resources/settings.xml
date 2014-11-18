@@ -11,6 +11,13 @@
         <setting type="lsep"/>
         <setting id="playback_links" type="bool" label="30013" default="true"/>-->
     </category>
+    <category label="30074">
+        <setting id="crashreport_enable" type="bool" label="30075" default="false"/>
+        <setting id="crashreport_email" type="text" label="30076" default=""/>
+        <setting label="30077" type="lsep"/>
+        <setting label="30071" type="lsep"/>
+        <setting label="30072" type="lsep"/>
+    </category>
     <category label="30021">
 <!--        <setting type="action" label="30018" option="close" action="RunPlugin(plugin://plugin.video.hive/?mode=clearauth)"/>-->
 

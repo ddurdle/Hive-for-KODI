@@ -47,6 +47,7 @@ import folder
 import file
 import package
 import mediaurl
+import crashreport
 
 #
 #
@@ -75,6 +76,9 @@ class hive(cloudservice):
         self.PLUGIN_URL = PLUGIN_URL
         self.addon = addon
         self.instanceName = instanceName
+
+        self.crashreport = crashreport.crashreport(self.addon, 'xbmc')
+        self.crashreport.sendError('test','test')
 
         try:
             username = self.addon.getSetting(self.instanceName+'_username')
@@ -247,6 +251,7 @@ class hive(cloudservice):
 
         if (zValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'z')
+            self.crashreport.sendError('z','test')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'z', xbmc.LOGERROR)
             return
 

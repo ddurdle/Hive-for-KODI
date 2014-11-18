@@ -318,7 +318,7 @@ if mode == 'main' or mode == 'folder':
             oc
         except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30049), addon.getLocalizedString(30050), 'oc')
-            log(aaddon.getLocalizedString(30050)+ 'oc', True)
+            log(addon.getLocalizedString(30050)+ 'oc', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
