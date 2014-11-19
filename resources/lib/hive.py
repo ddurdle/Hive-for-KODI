@@ -77,8 +77,8 @@ class hive(cloudservice):
         self.addon = addon
         self.instanceName = instanceName
 
-        self.crashreport = crashreport.crashreport(self.addon, 'xbmc')
-        self.crashreport.sendError('test','test')
+        self.crashreport = crashreport.crashreport(self.addon)
+#        self.crashreport.sendError('test','test')
 
         try:
             username = self.addon.getSetting(self.instanceName+'_username')
@@ -131,6 +131,7 @@ class hive(cloudservice):
 
         if (tokenValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'tokenValue')
+            self.crashreport.sendError('login:tokenValue',response_data)
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'tokenValue', xbmc.LOGERROR)
             return
 
@@ -177,6 +178,7 @@ class hive(cloudservice):
 
         if (tokenValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+            self.crashreport.sendError('getMediaList:tokenValue',response_data)
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
             return
 
@@ -203,6 +205,7 @@ class hive(cloudservice):
 
         except urllib2.URLError, e:
                 xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                self.crashreport.sendError('getMediaList',str(e))
                 return
 
         response_data = response.read()
@@ -251,7 +254,7 @@ class hive(cloudservice):
 
         if (zValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'z')
-            self.crashreport.sendError('z','test')
+            self.crashreport.sendError('getPlaybackCall:z','not set')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'z', xbmc.LOGERROR)
             return
 
@@ -283,11 +286,13 @@ class hive(cloudservice):
 
         if (requestTokenValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'requestTokenValue')
+            self.crashreport.sendError('getPlaybackCall:requestTokenValue',response_data)
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'requestTokenValue', xbmc.LOGERROR)
             return
 
         if (subIDValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'subIDValue')
+            self.crashreport.sendError('getPlaybackCall:subIDValue',response_data)
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'subIDValue', xbmc.LOGERROR)
             return
 
@@ -306,11 +311,15 @@ class hive(cloudservice):
             return
 
         downloadURL=''
-        downloadURL = response.info().getheader('Location')
+        try:
+            downloadURL = response.info().getheader('Location')
+        except:
+            pass
         response.close()
 
         if (downloadURL == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'downloadURL')
+            self.crashreport.sendError('getPlaybackCall:downloadURL','not set')
             xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'downloadURL', xbmc.LOGERROR)
             return
 
