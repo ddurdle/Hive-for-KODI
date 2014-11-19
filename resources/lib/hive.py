@@ -175,6 +175,10 @@ class hive(cloudservice):
 
         tokenValue = self.authorization.getToken('token')
 
+        userID = ''
+        for r in re.finditer('u\=(\d+)f\=(\d+)' ,folderName, re.DOTALL):
+            userID,userFolderID = r.groups()
+
 
         if (tokenValue == ''):
             xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
@@ -187,8 +191,10 @@ class hive(cloudservice):
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
 
-        if folderName=='':
+        if folderName=='' or userID != '':
             url = 'https://api-beta.hive.im/api/hive/get/'
+        elif folderName=='FRIENDS':
+            url = 'https://api-beta.hive.im/api/user/get-friends-list/'
         else:
             url = 'https://api-beta.hive.im/api/hive/get-children/'
 
@@ -197,8 +203,11 @@ class hive(cloudservice):
         # if action fails, validate login
 
         try:
+
             if folderName=='':
                 response = opener.open(request)
+            elif userID != '':
+                response = opener.open(request, 'userId='+userID)
             else:
                 response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
 
@@ -212,6 +221,29 @@ class hive(cloudservice):
         response.close()
 
         mediaFiles = []
+
+        if folderName == '':
+            media = package.package(0,folder.folder('FRIENDS','<<Friends>>'))
+            mediaFiles.append(media)
+
+
+
+        if folderName == 'FRIENDS':
+            for r in re.finditer('\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
+                userID,userName,userFirst,userLast = r.groups()
+                userName = re.sub('"', '', userName)
+                userFirst = re.sub('"', '', userFirst)
+                userLast = re.sub('"', '', userLast)
+
+                if userName != 'null':
+                    media = package.package(0,folder.folder('u='+userID+'f=0',userName))
+                else:
+                    media = package.package(0,folder.folder('u='+userID+'f=0',userFirst + ' - '+userLast))
+
+                mediaFiles.append(media)
+
+            return mediaFiles
+
         # parsing page for files
 #        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
         for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):

@@ -1,3 +1,5 @@
+Version 0.1.2
+- add friend's Hive support
 - add debug logging support
 - add more detail to login errors
 Version 0.1.0

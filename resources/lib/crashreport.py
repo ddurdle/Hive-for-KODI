@@ -78,7 +78,7 @@ class crashreport:
                     return
                 response.close()
                 xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30073), str(self.identifier))
-                self.addon.setSetting('crashreport_ident', self.identifier)
+                self.addon.setSetting('crashreport_ident', (str)(self.identifier))
 
 
 
