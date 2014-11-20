@@ -381,26 +381,29 @@ class hive(cloudservice):
     ##
     def getPlaybackCall(self, playbackType, package):
 
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
-        opener.addheaders = [('User-Agent', self.user_agent)]
+        tokenValue = self.authorization.getToken('token')
 
-        zValue = self.authorization.getToken('z')
 
-        if (zValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'z')
-            self.crashreport.sendError('getPlaybackCall:z','not set')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'z', xbmc.LOGERROR)
+        if (tokenValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+            self.crashreport.sendError('getMediaList:tokenValue',response_data)
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
             return
 
-        url = 'https://app.box.com/files'
 
-        opener.addheaders = [('User-Agent', self.user_agent),('Cookie', 'z='+zValue+';')]
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+
+        url = 'https://api-beta.hive.im/api/hive/get-streams/'
+
+
         request = urllib2.Request(url)
 
         # if action fails, validate login
 
         try:
-            response = opener.open(request)
+            response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
                 xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
@@ -409,56 +412,55 @@ class hive(cloudservice):
         response_data = response.read()
         response.close()
 
+#{"status":"success","data":[{"profile":"240p","progress":"100","status":"Encoded","position":null,"url":"https:\/\/dfiv2g75s7q7p.cloudfront.net\/api\/stream\/?token=TTgrSEh6SVJzL2ozT3RBbVdvbStCaUhGa1hVd3FqbG5GaFpwckxFc2VKYz0=&accessKey=4qu2p9aNpvKJ5QPu&file=Vy9ZQ2F5RWhOZk93dG84VUxvU3RxUzViRk1WL1NiY3RPQkxkaFpRSEgvdGMySXdKenpyTHFvc1dPWHRNakgxZE9nUmpGbVh6WENTT3prb2R1bXh6dGc9PQ==","lastPlayPosition":null},{"profile":"360p","progress":"100","status":"Encoded","position":null,"url":"https:\/\/dfiv2g75s7q7p.cloudfront.net\/api\/stream\/?token=TTgrSEh6SVJzL2ozT3RBbVdvbStCaUhGa1hVd3FqbG5GaFpwckxFc2VKYz0=&accessKey=4qu2p9aNpvKJ5QPu&file=ZjBmQ3lSQThMd2ZEdHBWcFIyTmRMYlhlNzhPbUZ0U3hDcENQRy8xcmgzeGNxVTl1amYzbDR5eDh1VUU5T0ZmQzBBNXpXZmpweDA3UUk5dzFvZ0dRWEE9PQ==","lastPlayPosition":null}],"date":1416459748,"_elapsed":14}
 
-        requestTokenValue=''
-        for r in re.finditer('(request_token) \= \'([^\']+)\'' ,response_data, re.DOTALL):
-            requestTokenName,requestTokenValue = r.groups()
+        mediaURLs = []
 
-        subIDValue=''
-        for r in re.finditer('(realtime_subscriber_id) \=\'([^\']+)\'' ,response_data, re.DOTALL):
-            subIDName,subIDValue = r.groups()
+        for r in re.finditer('\{\"profile\"\:[^\}]+\}' ,response_data, re.DOTALL):
+            entry = r.group()
 
-        if (requestTokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'requestTokenValue')
-            self.crashreport.sendError('getPlaybackCall:requestTokenValue',response_data)
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'requestTokenValue', xbmc.LOGERROR)
-            return
+            for r in re.finditer('\"profile\"\:\"([^\"]+)\"\,\"progress\"\:\"(\d+)\".*?\"url\"\:"([^\"]+)\"' ,entry, re.DOTALL):
+                quality,progress,url = r.groups()
+                if progress == "100":
+                    url = re.sub('\\\\', '', url)
+                    mediaURLs.append(mediaurl.mediaurl(url, quality, 0, 3))
 
-        if (subIDValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'subIDValue')
-            self.crashreport.sendError('getPlaybackCall:subIDValue',response_data)
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'subIDValue', xbmc.LOGERROR)
-            return
 
-        url = 'https://app.box.com/index.php?rm=box_download_file_via_post'
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+
+        url = 'https://api-beta.hive.im/api/hive/get-child/'
 
 
         request = urllib2.Request(url)
 
-                # if action fails, validate login
+        # if action fails, validate login
 
         try:
-            response = opener.open(request,'file_id='+package.file.id+'&request_token='+requestTokenValue)
+            response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-            return
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                return
 
-        downloadURL=''
-        try:
-            downloadURL = response.info().getheader('Location')
-        except:
-            pass
+        response_data = response.read()
         response.close()
 
-        if (downloadURL == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050), 'downloadURL')
-            self.crashreport.sendError('getPlaybackCall:downloadURL','not set')
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'downloadURL', xbmc.LOGERROR)
-            return
+        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
 
-        return downloadURL
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,downloadURL = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
 
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,downloadURL = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
+
+        return mediaURLs
 
     ##
     # retrieve a media url

@@ -75,8 +75,8 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     except:
         cleanURL = ''
 
-    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
-
+#    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
+    url = PLUGIN_URL+'?mode=video&title='+package.file.title+'&filename='+package.file.id
 
 #    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
 #    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
@@ -526,9 +526,15 @@ elif mode == 'video' or mode == 'audio':
 
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
-    url = service.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
+    mediaURLs = service.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
 
-    item = xbmcgui.ListItem(path=url)
+    options = []
+    for mediaURL in mediaURLs:
+            options.append(mediaURL.qualityDesc)
+    ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
+
+
+    item = xbmcgui.ListItem(path=mediaURLs[ret].url)
     item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 #play a video given its exact-title
