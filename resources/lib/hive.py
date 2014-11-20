@@ -273,6 +273,108 @@ class hive(cloudservice):
         return mediaFiles
 
 
+
+    ##
+    # retrieve a list of videos, using playback type stream
+    #   parameters: prompt for video quality (optional), cache type (optional)
+    #   returns: list of videos
+    ##
+    def getSearchResults(self):
+
+        tokenValue = self.authorization.getToken('token')
+
+
+        if (tokenValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+            self.crashreport.sendError('getMediaList:tokenValue',response_data)
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+            return
+
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+        url = 'https://api-beta.hive.im/api/user/get/'
+
+        request = urllib2.Request(url)
+
+        # if action fails, validate login
+
+        try:
+                response = opener.open(request)
+
+        except urllib2.URLError, e:
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                self.crashreport.sendError('getSearchResults',str(e))
+                return
+
+        response_data = response.read()
+        response.close()
+
+        userID = ''
+        searchAPIKey = ''
+        for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
+                userID,searchAPIKey = r.groups()
+
+        searchText = ''
+        try:
+            dialog = xbmcgui.Dialog()
+            searchText = dialog.input('Enter search string', type=xbmcgui.INPUT_ALPHANUM)
+        except:
+            searchText = 'life'
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
+
+        url = 'https://w59tafxi29-1.algolia.io/1/indexes/HiveBeta/query'
+
+        request = urllib2.Request(url)
+
+        # if action fails, validate login
+
+        try:
+                response = opener.open(request, '{"params":"query='+searchText+'","apiKey":"'+searchAPIKey+'","appID":"W59TAFXI29","X-Algolia-TagFilters":"('+userID+')"}')
+
+        except urllib2.URLError, e:
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                self.crashreport.sendError('getSearchResults',str(e))
+                return
+
+        response_data = response.read()
+        response.close()
+
+        for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
+                userID,searchAPIKey = r.groups()
+
+
+
+        mediaFiles = []
+
+        # parsing page for files
+#        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
+        for r in re.finditer('\"id\"\:.*?\d\"\]' ,response_data, re.DOTALL):
+                entry = r.group()
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                    folderID,folderName = q.groups()
+                    media = package.package(0,folder.folder(folderID,folderName))
+                    mediaFiles.append(media)
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
+                    fileID,fileName = q.groups()
+
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
+                    mediaFiles.append(media)
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
+                    fileID,fileName = q.groups()
+
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', ''),folder.folder('',''))
+                    mediaFiles.append(media)
+
+        return mediaFiles
+
+
     ##
     # retrieve a playback url
     #   returns: url

@@ -68,9 +68,13 @@ def addMediaFile(service, isQuickLink, playbackType, package):
     listitem.setProperty('fanart_image', package.file.fanart)
     cm=[]
 
-    url = package.getMediaURL()
-    cleanURL = re.sub('---', '', url)
-    cleanURL = re.sub('&', '---', cleanURL)
+    try:
+        url = package.getMediaURL()
+        cleanURL = re.sub('---', '', url)
+        cleanURL = re.sub('&', '---', cleanURL)
+    except:
+        cleanURL = ''
+
     url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
 
 
@@ -208,8 +212,8 @@ log('plugin url: ' + PLUGIN_URL)
 log('plugin queries: ' + str(plugin_queries))
 log('plugin handle: ' + str(plugin_handle))
 
-#if mode == 'main':
-#    addMenu(PLUGIN_URL+'?mode=options','<<'+addon.getLocalizedString(30043)+'>>')
+if mode == 'main':
+    addMenu(PLUGIN_URL+'?mode=search','<<SEARCH>>')
 
 
 #dump a list of videos available to play
@@ -323,6 +327,126 @@ if mode == 'main' or mode == 'folder':
 
 
         mediaItems = service.getMediaList(folderName,0)
+
+        if mediaItems:
+            for item in mediaItems:
+
+                try:
+                    if item.file == 0:
+                        addDirectory(service, item.folder)
+                    else:
+                        addMediaFile(service, isQuickLink, cacheType, item)
+                except:
+                        addMediaFile(service, isQuickLink, cacheType, item)
+
+        service.updateAuthorization(addon)
+
+#dump a list of videos available to play
+elif mode == 'search':
+
+    cacheType = int(addon.getSetting('playback_type'))
+
+
+    try:
+        isQuickLink = addon.getSetting('playback_type')
+        if isQuickLink == 'true':
+            isQuickLink = True
+        else:
+            isQuickLink = False
+    except:
+        isQuickLink = False
+
+
+    instanceName = ''
+    try:
+        instanceName = (plugin_queries['instance']).lower()
+    except:
+        pass
+
+    numberOfAccounts = numberOfAccounts(PLUGIN_NAME)
+
+    # show list of services
+    if numberOfAccounts > 1 and instanceName == '':
+        count = 1
+        max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+        while True:
+            instanceName = PLUGIN_NAME+str(count)
+            try:
+                username = addon.getSetting(instanceName+'_username')
+                if username != '':
+                    addMenu(PLUGIN_URL+'?mode=main&instance='+instanceName,username)
+            except:
+                break
+            if count == max_count:
+                break
+            count = count + 1
+
+    else:
+        # show index of accounts
+        if instanceName == '' and numberOfAccounts == 1:
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                loop = True
+                while loop:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+
+                            #let's log in
+                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                            loop = False
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+        # no accounts defined
+        elif numberOfAccounts == 0:
+
+            #legacy account conversion
+            try:
+                username = addon.getSetting('username')
+
+                if username != '':
+                    addon.setSetting(PLUGIN_NAME+'1_username', username)
+                    addon.setSetting(PLUGIN_NAME+'1_password', addon.getSetting('password'))
+                    addon.setSetting(PLUGIN_NAME+'1_auth_token', addon.getSetting('auth_token'))
+                    addon.setSetting(PLUGIN_NAME+'1_auth_session', addon.getSetting('auth_session'))
+                    addon.setSetting('username', '')
+                    addon.setSetting('password', '')
+                    addon.setSetting('auth_token', '')
+                    addon.setSetting('auth_session', '')
+                else:
+                    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                    log(addon.getLocalizedString(30015), True)
+                    xbmcplugin.endOfDirectory(plugin_handle)
+            except :
+                    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                    log(addon.getLocalizedString(30015), True)
+                    xbmcplugin.endOfDirectory(plugin_handle)
+
+            #let's log in
+            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+
+        # show entries of a single account (such as folder)
+        elif instanceName != '':
+
+            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+        try:
+            service
+        except NameError:
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(addon.getLocalizedString(30050)+ 'hive-login', True)
+            xbmcplugin.endOfDirectory(plugin_handle)
+
+
+        mediaItems = service.getSearchResults()
 
         if mediaItems:
             for item in mediaItems:
