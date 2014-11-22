@@ -1,3 +1,7 @@
+Version 0.1.4
+- add options menu
+- cleanup settings
+- add thumbnail support
 - improved authorization key handling
 - fix for crashreporting
 Version 0.1.3

@@ -93,7 +93,6 @@ class hive(cloudservice):
 
         #token?
         if (not self.authorization.loadToken(self.instanceName,addon, 'token')):
-            self.authorization.isUpdated = True
             self.login()
 
 
@@ -103,6 +102,8 @@ class hive(cloudservice):
     # perform login
     ##
     def login(self):
+
+        self.authorization.isUpdated = True
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
         opener.addheaders = [('User-Agent', self.user_agent)]
@@ -183,12 +184,16 @@ class hive(cloudservice):
         for r in re.finditer('u\=(\d+)f\=(\d+)' ,folderName, re.DOTALL):
             userID,userFolderID = r.groups()
 
-
+        #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
-            self.crashreport.sendError('getMediaList:tokenValue',response_data)
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
-            return
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                return
 
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
@@ -215,11 +220,23 @@ class hive(cloudservice):
             else:
                 response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
 
-
+        #maybe authorization key expired?
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                self.crashreport.sendError('getMediaList',str(e))
-                return
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    if folderName=='':
+                        response = opener.open(request)
+                    elif userID != '':
+                        response = opener.open(request, 'userId='+userID)
+                    else:
+                        response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getMediaList',str(e))
+                    return
 
         response_data = response.read()
         response.close()
@@ -258,19 +275,21 @@ class hive(cloudservice):
                     media = package.package(0,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,downloadURL = q.groups()
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,thumnail,downloadURL = q.groups()
                     downloadURL = re.sub('\\\\', '', downloadURL)
+                    thumnail = re.sub('\\\\', '', thumnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,downloadURL = q.groups()
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,thumnail,downloadURL = q.groups()
                     downloadURL = re.sub('\\\\', '', downloadURL)
+                    thumnail = re.sub('\\\\', '', thumnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', ''),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
@@ -288,11 +307,16 @@ class hive(cloudservice):
         tokenValue = self.authorization.getToken('token')
 
 
+        #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
-            self.crashreport.sendError('getMediaList:tokenValue',response_data)
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
-            return
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
 
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
@@ -308,9 +332,16 @@ class hive(cloudservice):
                 response = opener.open(request)
 
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                self.crashreport.sendError('getSearchResults',str(e))
-                return
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getSearchResults',str(e))
+                    return
 
         response_data = response.read()
         response.close()
@@ -340,17 +371,22 @@ class hive(cloudservice):
                 response = opener.open(request, '{"params":"query='+searchText+'","apiKey":"'+searchAPIKey+'","appID":"W59TAFXI29","X-Algolia-TagFilters":"('+userID+')"}')
 
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                self.crashreport.sendError('getSearchResults',str(e))
-                return
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, '{"params":"query='+searchText+'","apiKey":"'+searchAPIKey+'","appID":"W59TAFXI29","X-Algolia-TagFilters":"('+userID+')"}')
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getSearchResults',str(e))
+                    return
 
         response_data = response.read()
         response.close()
 
         for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
                 userID,searchAPIKey = r.groups()
-
-
 
         mediaFiles = []
 
@@ -388,11 +424,16 @@ class hive(cloudservice):
         tokenValue = self.authorization.getToken('token')
 
 
+        #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
-            self.crashreport.sendError('getMediaList:tokenValue',response_data)
-            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
-            return
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
 
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
@@ -410,8 +451,16 @@ class hive(cloudservice):
             response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                return
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getPlaybackCall',str(e))
+                    return
 
         response_data = response.read()
         response.close()
@@ -445,8 +494,16 @@ class hive(cloudservice):
             response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
-                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                return
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getPlaybackCall',str(e))
+                    return
 
         response_data = response.read()
         response.close()

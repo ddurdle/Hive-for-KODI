@@ -213,6 +213,7 @@ log('plugin queries: ' + str(plugin_queries))
 log('plugin handle: ' + str(plugin_handle))
 
 if mode == 'main':
+    addMenu(PLUGIN_URL+'?mode=options','<< '+addon.getLocalizedString(30043)+' >>')
     addMenu(PLUGIN_URL+'?mode=search','<<SEARCH>>')
 
 
@@ -595,10 +596,42 @@ elif mode == 'streamurl':
 
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
+#clear the authorization token(s) from the identified instanceName or all instances
+elif mode == 'clearauth':
+
+    try:
+        instanceName = plugin_queries['instance']
+    except:
+        instanceName = ''
+
+    if instanceName != '':
+
+        try:
+            addon.setSetting(instanceName + '_token', '')
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30023))
+        except:
+            #error: instance doesn't exist
+            pass
+
+    # clear all accounts
+    else:
+        count = 1
+        max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+        while True:
+            instanceName = PLUGIN_NAME+str(count)
+            try:
+                addon.setSetting(instanceName + '_token', '')
+            except:
+                break
+            if count == max_count:
+                break
+            count = count + 1
+        xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30023))
+
 
 if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
     addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
-    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
+#    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
 
 
 
