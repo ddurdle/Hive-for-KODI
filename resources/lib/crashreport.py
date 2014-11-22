@@ -69,9 +69,21 @@ class crashreport:
                 request = urllib2.Request(url)
                 self.cookiejar.add_cookie_header(request)
 
+
+                data = {}
+                data['entry.977603264'] = str(self.identifier)
+                data['entry.243770882'] = str(self.pluginName)
+                data['entry.878700058'] = str(self.pluginVersion)
+                data['entry.1258581285'] = str(self.email)
+                data['entry.1260404759'] = str(self.xbmcVersion)
+                data['entry.1753855090'] = str(details)
+                data['entry.671238889'] = str(error)
+                url_values = urllib.urlencode(data)
+
                 # try login
                 try:
-                    response = opener.open(request,'entry.977603264='+str(self.identifier)+'&entry.243770882='+str(self.pluginName)+'&entry.878700058='+str(self.pluginVersion)+'&entry.1258581285='+str(self.email)+'&entry.1260404759='+str(self.xbmcVersion)+'&entry.1753855090='+str(details)+'&entry.671238889='+str(error))
+#                    response = opener.open(request,'entry.977603264='+str(self.identifier)+'&entry.243770882='+str(self.pluginName)+'&entry.878700058='+str(self.pluginVersion)+'&entry.1258581285='+str(self.email)+'&entry.1260404759='+str(self.xbmcVersion)+'&entry.1753855090='+str(details)+'&entry.671238889='+str(error))
+                    response = opener.open(request,url_values)
 
                 except urllib2.URLError, e:
                     xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)

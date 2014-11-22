@@ -119,6 +119,7 @@ class hive(cloudservice):
         response_data = response.read()
         response.close()
 
+
         for cookie in self.cookiejar:
             for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
                         str(cookie), re.DOTALL):
