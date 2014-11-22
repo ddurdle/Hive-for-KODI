@@ -91,8 +91,11 @@ class hive(cloudservice):
 
         self.user_agent = user_agent
 
+        #token?
+        if (not self.authorization.loadToken(self.instanceName,addon, 'token')):
+            self.authorization.isUpdated = True
+            self.login()
 
-        self.login();
 
 
 

@@ -65,4 +65,17 @@ class authorization:
         for token in self.auth:
             addon.setSetting(instanceName + '_'+token, self.auth[token])
 
+    ##
+    # load the latest authorization tokens
+    ##
+    def loadToken(self,instanceName,addon, token):
+        try:
+            tokenValue = addon.getSetting(instanceName + '_'+token)
+            if tokenValue != '':
+              self.auth[token] = tokenValue
+              return True
+            else:
+              return False
+        except:
+            return False
 
