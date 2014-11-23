@@ -1,3 +1,4 @@
+- add fanart support
 Version 0.1.4
 - add options menu
 - cleanup settings

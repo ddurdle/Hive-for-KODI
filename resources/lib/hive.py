@@ -267,6 +267,16 @@ class hive(cloudservice):
 
         # parsing page for files
 #        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
+        fanart = ''
+        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
+
+                #fanart
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"fanart\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,thumnail,fanart = q.groups()
+                    fanart = re.sub('\\\\', '', fanart)
+
+
         for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
@@ -280,7 +290,7 @@ class hive(cloudservice):
                     downloadURL = re.sub('\\\\', '', downloadURL)
                     thumnail = re.sub('\\\\', '', thumnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
@@ -289,7 +299,7 @@ class hive(cloudservice):
                     downloadURL = re.sub('\\\\', '', downloadURL)
                     thumnail = re.sub('\\\\', '', thumnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, fanart, thumnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
