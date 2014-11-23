@@ -1,4 +1,6 @@
+Version 0.1.5
 - add fanart support
+- add sorted media list setting (sort folders and media by alphabetical order or default)
 Version 0.1.4
 - add options menu
 - cleanup settings

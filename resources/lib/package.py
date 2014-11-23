@@ -25,6 +25,13 @@ class package:
     ##
     ##
     def __init__(self, file, folder):
+        try:
+            if file.title != '':
+                self.sortTitle = file.title
+            else:
+                self.sortTitle = folder.title
+        except:
+            self.sortTitle = folder.title
         self.file = file
         self.folder = folder
         self.mediaurl = None
@@ -34,3 +41,14 @@ class package:
 
     def getMediaURL(self):
         return self.mediaurl.url
+
+    def __repr__(self):
+        return '{}: {} {}'.format(self.__class__.__name__,
+                                  self.sortTitle)
+
+    def __cmp__(self, other):
+        if hasattr(other, 'sortTitle'):
+            return self.sortTitle.__cmp__(other.sortTitle)
+
+    def getKey(self):
+        return self.sortTitle

@@ -10,6 +10,7 @@
         <setting id="cache_folder" type="folder" label="30012" visible="eq(-1,1)" default="special://profile/addon_data/plugin.video.hive/cache"/>
         <setting type="lsep"/>
         <setting id="playback_links" type="bool" label="30013" default="true"/>-->
+        <setting id="sorted" type="enum" label="30054" values="alphabetical|Hive default order" default="0"/>
     </category>
     <category label="30074">
         <setting id="crashreport_enable" type="bool" label="30075" default="false"/>

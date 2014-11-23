@@ -329,15 +329,32 @@ if mode == 'main' or mode == 'folder':
 
         mediaItems = service.getMediaList(folderName,0)
 
-        if mediaItems:
-            for item in mediaItems:
+        isSorted = "0"
+        try:
+            isSorted = addon.getSetting('sorted')
+        except:
+            pass
 
-                try:
-                    if item.file == 0:
-                        addDirectory(service, item.folder)
-                    else:
+        if mediaItems:
+            if isSorted == "0":
+                for item in sorted(mediaItems, key=lambda package: package.sortTitle):
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, cacheType, item)
+                    except:
                         addMediaFile(service, isQuickLink, cacheType, item)
-                except:
+            else:
+                for item in mediaItems:
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, cacheType, item)
+                    except:
                         addMediaFile(service, isQuickLink, cacheType, item)
 
         service.updateAuthorization(addon)
@@ -449,15 +466,32 @@ elif mode == 'search':
 
         mediaItems = service.getSearchResults()
 
-        if mediaItems:
-            for item in mediaItems:
+        isSorted = "0"
+        try:
+            isSorted = addon.getSetting('sorted')
+        except:
+            pass
 
-                try:
-                    if item.file == 0:
-                        addDirectory(service, item.folder)
-                    else:
+        if mediaItems:
+            if isSorted == "0":
+                for item in sorted(mediaItems, key=lambda package: package.sortTitle):
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, cacheType, item)
+                    except:
                         addMediaFile(service, isQuickLink, cacheType, item)
-                except:
+            else:
+                for item in mediaItems:
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, cacheType, item)
+                    except:
                         addMediaFile(service, isQuickLink, cacheType, item)
 
         service.updateAuthorization(addon)
