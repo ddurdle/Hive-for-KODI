@@ -327,6 +327,8 @@ if mode == 'main' or mode == 'folder':
             log(addon.getLocalizedString(30050)+ 'hive-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
+        if folderName == '':
+            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','<<Friends>>')
 
         mediaItems = service.getMediaList(folderName,0)
 
@@ -698,8 +700,7 @@ elif mode == 'buildstrm':
 
         else:
 
-            import xbmcvfs
-            xbmcvfs.mkdir(path)
+
 
 
             try:
@@ -708,6 +709,12 @@ elif mode == 'buildstrm':
                 instanceName = plugin_queries['instanceName']
             except:
                 folderID = ''
+
+            try:
+                filename = plugin_queries['filename']
+                title = plugin_queries['title']
+            except:
+                filename = ''
 
 
             if folderID != '':
@@ -719,7 +726,16 @@ elif mode == 'buildstrm':
 
                 if username != '':
                     service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
-                    service.buildSTRM(folderID)
+                    service.buildSTRM(path + '/'+title,folderID)
+
+
+            elif filename != '':
+                            url = PLUGIN_URL+'?mode=video&title='+title+'&filename='+filename
+                            filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
+                            strmFile = open(filename, "w")
+
+                            strmFile.write(url+'\n')
+                            strmFile.close()
 
             else:
 
@@ -733,29 +749,8 @@ elif mode == 'buildstrm':
                         username = ''
 
                     if username != '':
-
-                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
-
-                            mediaItems = service.getMediaList(folderName,0)
-
-                            if mediaItems:
-                                for item in mediaItems:
-
-                                    try:
-                                        if item.file == 0:
-                                            url = 0
-                                        else:
-                                            url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
-                                    except:
-                                        url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
-
-                                    if url != 0:
-                                        filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
-                                        strmFile = open(filename, "w")
-
-                                        strmFile.write(url+'\n')
-                                        strmFile.close()
-
+                        service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                        service.buildSTRM(path + '/'+username)
 
                     if count == max_count:
                         break

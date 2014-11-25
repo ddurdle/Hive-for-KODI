@@ -49,6 +49,11 @@ import package
 import mediaurl
 import crashreport
 
+#global variables
+PLUGIN_NAME = 'hive'
+PLUGIN_URL = sys.argv[0]
+
+
 #
 #
 #
@@ -243,9 +248,9 @@ class hive(cloudservice):
 
         mediaFiles = []
 
-        if folderName == '':
-            media = package.package(0,folder.folder('FRIENDS','<<Friends>>'))
-            mediaFiles.append(media)
+#        if folderName == '':
+#            media = package.package(0,folder.folder('FRIENDS','<<Friends>>'))
+#            mediaFiles.append(media)
 
 
 
@@ -366,7 +371,9 @@ class hive(cloudservice):
             dialog = xbmcgui.Dialog()
             searchText = dialog.input('Enter search string', type=xbmcgui.INPUT_ALPHANUM)
         except:
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30100))
             searchText = 'life'
+            return []
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
@@ -548,7 +555,10 @@ class hive(cloudservice):
         return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory='+folder.id
 
 
-    def buildSTRM(self, folderID):
+    def buildSTRM(self, path, folderID=''):
+
+        import xbmcvfs
+        xbmcvfs.mkdir(path)
 
         mediaItems = self.getMediaList(folderID,0)
 
@@ -558,7 +568,7 @@ class hive(cloudservice):
                 url = 0
                 try:
                     if item.file == 0:
-                        self.buildSTRM(item.folder.id)
+                        self.buildSTRM(path + '/'+item.folder.title, item.folder.id)
                     else:
                         url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
                 except:
