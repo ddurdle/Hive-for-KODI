@@ -78,15 +78,16 @@ def addMediaFile(service, isQuickLink, playbackType, package):
 #    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
     url = PLUGIN_URL+'?mode=video&title='+package.file.title+'&filename='+package.file.id
 
-#    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&streamurl='+cleanURL+')', ))
+
+    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&filename='+package.file.id+')', ))
 #    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
 #    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
 #    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
     #cm.append(( addon.getLocalizedString(30032), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=download&title='+package.file.title+'&filename='+package.file.id+')', ))
 
 #    listitem.addContextMenuItems( commands )
-    if cm:
-        listitem.addContextMenuItems(cm, False)
+#    if cm:
+    listitem.addContextMenuItems(cm, False)
     xbmcplugin.addDirectoryItem(plugin_handle, url, listitem,
                                 isFolder=False, totalItems=0)
 
@@ -96,7 +97,7 @@ def addDirectory(service, folder):
 
     if folder.id != '':
         cm=[]
-#        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
         listitem.addContextMenuItems(cm, False)
     listitem.setProperty('fanart_image', fanart)
     xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
@@ -663,9 +664,111 @@ elif mode == 'clearauth':
         xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30023))
 
 
+#create strm files
+elif mode == 'buildstrm':
+
+    try:
+        path = addon.getSetting('path')
+    except:
+        path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
+
+    if path == '':
+        path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
+
+    if path != '':
+        returnPrompt = xbmcgui.Dialog().yesno(addon.getLocalizedString(30000), addon.getLocalizedString(30027) + '\n'+path +  '?')
+
+
+    if path != '' and returnPrompt:
+
+        try:
+            url = plugin_queries['streamurl']
+            title = plugin_queries['title']
+            url = re.sub('---', '&', url)
+        except:
+            url=''
+
+        if url != '':
+
+                filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
+                strmFile = open(filename, "w")
+
+                strmFile.write(url+'\n')
+                strmFile.close()
+
+        else:
+
+            import xbmcvfs
+            xbmcvfs.mkdir(path)
+
+
+            try:
+                folderID = plugin_queries['folderID']
+                title = plugin_queries['title']
+                instanceName = plugin_queries['instanceName']
+            except:
+                folderID = ''
+
+
+            if folderID != '':
+
+                try:
+                    username = addon.getSetting(instanceName+'_username')
+                except:
+                    username = ''
+
+                if username != '':
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                    service.buildSTRM(folderID)
+
+            else:
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                    except:
+                        username = ''
+
+                    if username != '':
+
+                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+                            mediaItems = service.getMediaList(folderName,0)
+
+                            if mediaItems:
+                                for item in mediaItems:
+
+                                    try:
+                                        if item.file == 0:
+                                            url = 0
+                                        else:
+                                            url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+                                    except:
+                                        url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+
+                                    if url != 0:
+                                        filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
+                                        strmFile = open(filename, "w")
+
+                                        strmFile.write(url+'\n')
+                                        strmFile.close()
+
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+
+        xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30028))
+
+
+
 if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
     addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
-#    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
+    addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
 
 
 

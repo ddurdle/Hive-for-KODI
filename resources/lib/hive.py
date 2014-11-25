@@ -548,6 +548,30 @@ class hive(cloudservice):
         return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory='+folder.id
 
 
+    def buildSTRM(self, folderID):
+
+        mediaItems = self.getMediaList(folderID,0)
+
+        if mediaItems:
+            for item in mediaItems:
+
+                url = 0
+                try:
+                    if item.file == 0:
+                        self.buildSTRM(item.folder.id)
+                    else:
+                        url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+                except:
+                    url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+
+
+                if url != 0:
+                    filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
+                    strmFile = open(filename, "w")
+
+                    strmFile.write(url+'\n')
+                    strmFile.close()
+
 
 class MyHTTPErrorProcessor(urllib2.HTTPErrorProcessor):
 
