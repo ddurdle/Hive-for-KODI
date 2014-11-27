@@ -1,3 +1,4 @@
+
 Version 0.1.6
 - add build STRM
 - automatic build of STRM support for 1) your hive, 2) your folders, 3) individual files, 4) friend's hive, 5) search results
