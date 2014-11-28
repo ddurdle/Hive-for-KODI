@@ -329,6 +329,7 @@ if mode == 'main' or mode == 'folder':
 
         if folderName == '':
             addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','<<Friends>>')
+            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','<<Latest Feed>>')
 
         mediaItems = service.getMediaList(folderName,0)
 

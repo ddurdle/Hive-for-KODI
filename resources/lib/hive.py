@@ -209,6 +209,8 @@ class hive(cloudservice):
             url = 'https://api-beta.hive.im/api/hive/get/'
         elif folderName=='FRIENDS':
             url = 'https://api-beta.hive.im/api/user/get-friends-list/'
+        elif folderName=='FEED':
+            url = 'https://api-beta.hive.im/api/activity/get/'
         else:
             url = 'https://api-beta.hive.im/api/hive/get-children/'
 
@@ -222,6 +224,10 @@ class hive(cloudservice):
                 response = opener.open(request)
             elif userID != '':
                 response = opener.open(request, 'userId='+userID)
+            elif folderName=='FEED':
+                response = opener.open(request, 'offset=0&limit=50')
+            elif folderName=='FRIENDS':
+                response = opener.open(request, 'offset=0&limit=300')
             else:
                 response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
 
@@ -254,7 +260,7 @@ class hive(cloudservice):
 
 
 
-        if folderName == 'FRIENDS':
+        if folderName == 'FRIENDS' or folderName == 'FEED' :
             for r in re.finditer('\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
                 userID,userName,userFirst,userLast = r.groups()
                 userName = re.sub('"', '', userName)
