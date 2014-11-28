@@ -12,6 +12,15 @@
         <setting id="playback_links" type="bool" label="30013" default="true"/>-->
         <setting id="sorted" type="enum" label="30054" values="alphabetical|Hive default order" default="0"/>
     </category>
+    <category label="30060">
+        <setting label="30061" type="lsep"/>
+        <setting id="gdrive_library" type="bool" label="30064" default="false" />
+        <setting id="gdrive_username" type="text" label="30062" default="" />
+        <setting id="gdrive_password" type="text" label="30002" option="hidden" default="" />
+        <setting id="gdrive_filename" type="text" label="30063" default="" />
+        <setting id="gdrive_save_auth_token" type="bool" label="30005" default="true" />
+    </category>
+
     <category label="30074">
         <setting id="crashreport_enable" type="bool" label="30075" default="false"/>
         <setting id="crashreport_email" type="text" label="30076" default=""/>

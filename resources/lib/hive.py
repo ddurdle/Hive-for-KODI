@@ -48,6 +48,7 @@ import file
 import package
 import mediaurl
 import crashreport
+import gSpreadsheets
 
 #global variables
 PLUGIN_NAME = 'hive'
@@ -100,6 +101,27 @@ class hive(cloudservice):
         if (not self.authorization.loadToken(self.instanceName,addon, 'token')):
             self.login()
 
+        self.isLibrary = False
+        try:
+            if self.addon.getSetting('gdrive_library') == 'true':
+                self.isLibrary = True
+            else:
+                self.isLibrary = False
+        except:
+                self.isLibrary = False
+
+
+        if self.isLibrary:
+            self.library = gSpreadsheets.gSpreadsheets(self.addon,self.crashreport,self.user_agent)
+
+            spreadsheets = self.library.getSpreadsheetList()
+            for title in spreadsheets.iterkeys():
+                if title == 'Hive':
+                    worksheets = self.library.getSpreadsheetWorksheets(spreadsheets[title])
+
+#                    for worksheet in worksheets.iterkeys():
+#                        if worksheet == 'schedule':
+#                            shows = tvScheduler.getShows(worksheets[worksheet] ,channel)
 
 
 
