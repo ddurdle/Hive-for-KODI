@@ -260,7 +260,7 @@ class hive(cloudservice):
 
 
 
-        if folderName == 'FRIENDS' or folderName == 'FEED' :
+        if folderName == 'FRIENDS':
             for r in re.finditer('\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
                 userID,userName,userFirst,userLast = r.groups()
                 userName = re.sub('"', '', userName)
@@ -274,6 +274,20 @@ class hive(cloudservice):
 
                 mediaFiles.append(media)
 
+            return mediaFiles
+        elif folderName == 'FEED':
+            for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
             return mediaFiles
 
         # parsing page for files
