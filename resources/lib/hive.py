@@ -279,15 +279,19 @@ class hive(cloudservice):
             for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName = q.groups()
-                    downloadURL = re.sub('\\\\', '', downloadURL)
-                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
+                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"video\"' ,entry, re.DOTALL):
+                    fileID,thumbnail,fileName = q.groups()
+                    thumbnail = re.sub('\\\\', '', thumbnail)
+                    fileName = urllib.quote(fileName)
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumbnail),folder.folder('',''))
+                    mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName = q.groups()
-                    downloadURL = re.sub('\\\\', '', downloadURL)
-                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
+                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"album\"' ,entry, re.DOTALL):
+                    fileID,thumbnail,fileName = q.groups()
+                    thumbnail = re.sub('\\\\', '', thumbnail)
+                    fileName = urllib.quote(fileName)
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumbnail),folder.folder('',''))
+                    mediaFiles.append(media)
             return mediaFiles
 
         # parsing page for files
@@ -298,7 +302,7 @@ class hive(cloudservice):
 
                 #fanart
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"fanart\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,thumnail,fanart = q.groups()
+                    fileID,thumbnail,fanart = q.groups()
                     fanart = re.sub('\\\\', '', fanart)
 
 
@@ -307,24 +311,27 @@ class hive(cloudservice):
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     folderID,folderName = q.groups()
+                    folderName = urllib.quote(folderName)
                     media = package.package(0,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,thumnail,downloadURL = q.groups()
+                    fileID,fileName,thumbnail,downloadURL = q.groups()
+                    fileName = urllib.quote(fileName)
                     downloadURL = re.sub('\\\\', '', downloadURL)
-                    thumnail = re.sub('\\\\', '', thumnail)
+                    thumbnail = re.sub('\\\\', '', thumbnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,thumnail,downloadURL = q.groups()
+                    fileID,fileName,thumbnail,downloadURL = q.groups()
+                    fileName = urllib.quote(fileName)
                     downloadURL = re.sub('\\\\', '', downloadURL)
-                    thumnail = re.sub('\\\\', '', thumnail)
+                    thumbnail = re.sub('\\\\', '', thumbnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, fanart, thumnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, fanart, thumbnail),folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
@@ -434,18 +441,19 @@ class hive(cloudservice):
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     folderID,folderName = q.groups()
+                    folderName = urllib.quote(folderName)
                     media = package.package(0,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
                     fileID,fileName = q.groups()
-
+                    fileName = urllib.quote(fileName)
                     media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
                     mediaFiles.append(media)
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
                     fileID,fileName = q.groups()
-
+                    fileName = urllib.quote(fileName)
                     media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', ''),folder.folder('',''))
                     mediaFiles.append(media)
 

@@ -16,6 +16,7 @@
 
 
 '''
+import urllib
 
 #
 #
@@ -40,6 +41,9 @@ class file:
         self.genre = ''
         self.year = ''
         self.artist = ''
+
+    def displayTitle(self):
+        return urllib.unquote(self.title)
 
     def __repr__(self):
         return '{}: {} {}'.format(self.__class__.__name__,

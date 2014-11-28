@@ -48,19 +48,19 @@ def parse_query(query):
 
 def addMediaFile(service, isQuickLink, playbackType, package):
 
-    listitem = xbmcgui.ListItem(package.file.title, iconImage=package.file.thumbnail,
+    listitem = xbmcgui.ListItem(package.file.displayTitle(), iconImage=package.file.thumbnail,
                                 thumbnailImage=package.file.thumbnail)
 
     if package.file.type == package.file.AUDIO:
-        infolabels = decode_dict({ 'title' : package.file.title })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() })
         listitem.setInfo('Music', infolabels)
         playbackURL = '?mode=audio'
     elif package.file.type == package.file.VIDEO:
-        infolabels = decode_dict({ 'title' : package.file.title , 'plot' : package.file.plot })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
         listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
     else:
-        infolabels = decode_dict({ 'title' : package.file.title , 'plot' : package.file.plot })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
         listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
 
@@ -92,7 +92,7 @@ def addMediaFile(service, isQuickLink, playbackType, package):
                                 isFolder=False, totalItems=0)
 
 def addDirectory(service, folder):
-    listitem = xbmcgui.ListItem(decode(folder.title), iconImage='', thumbnailImage='')
+    listitem = xbmcgui.ListItem(decode(folder.displayTitle()), iconImage='', thumbnailImage='')
     fanart = addon.getAddonInfo('path') + '/fanart.jpg'
 
     if folder.id != '':
@@ -221,7 +221,7 @@ if mode == 'main':
 #dump a list of videos available to play
 if mode == 'main' or mode == 'folder':
 
-    cacheType = int(addon.getSetting('playback_type'))
+    playbackType = int(addon.getSetting('playback_type'))
 
     folderName=''
 
@@ -347,9 +347,9 @@ if mode == 'main' or mode == 'folder':
                         if item.file == 0:
                             addDirectory(service, item.folder)
                         else:
-                            addMediaFile(service, isQuickLink, cacheType, item)
+                            addMediaFile(service, isQuickLink, playbackType, item)
                     except:
-                        addMediaFile(service, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, playbackType, item)
             else:
                 for item in mediaItems:
 
@@ -357,16 +357,16 @@ if mode == 'main' or mode == 'folder':
                         if item.file == 0:
                             addDirectory(service, item.folder)
                         else:
-                            addMediaFile(service, isQuickLink, cacheType, item)
+                            addMediaFile(service, isQuickLink, playbackType, item)
                     except:
-                        addMediaFile(service, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, playbackType, item)
 
         service.updateAuthorization(addon)
 
 #dump a list of videos available to play
 elif mode == 'search':
 
-    cacheType = int(addon.getSetting('playback_type'))
+    playbackType = int(addon.getSetting('playback_type'))
 
 
     try:
@@ -484,9 +484,9 @@ elif mode == 'search':
                         if item.file == 0:
                             addDirectory(service, item.folder)
                         else:
-                            addMediaFile(service, isQuickLink, cacheType, item)
+                            addMediaFile(service, isQuickLink, playbackType, item)
                     except:
-                        addMediaFile(service, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, playbackType, item)
             else:
                 for item in mediaItems:
 
@@ -494,9 +494,9 @@ elif mode == 'search':
                         if item.file == 0:
                             addDirectory(service, item.folder)
                         else:
-                            addMediaFile(service, isQuickLink, cacheType, item)
+                            addMediaFile(service, isQuickLink, playbackType, item)
                     except:
-                        addMediaFile(service, isQuickLink, cacheType, item)
+                        addMediaFile(service, isQuickLink, playbackType, item)
 
         service.updateAuthorization(addon)
 
@@ -516,12 +516,12 @@ elif mode == 'video' or mode == 'audio':
         title = ''
 
     try:
-        cacheType = plugin_queries['playback']
+        playbackType = plugin_queries['playback']
     except:
         try:
-            cacheType = int(addon.getSetting('playback_type'))
+            playbackType = int(addon.getSetting('playback_type'))
         except:
-            cacheType = 0
+            playbackType = 0
 
 
     instanceName = ''
@@ -565,15 +565,22 @@ elif mode == 'video' or mode == 'audio':
 
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
-    mediaURLs = service.getPlaybackCall(cacheType,package.package(mediaFile,mediaFolder ))
+    mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
 
-    options = []
-    for mediaURL in mediaURLs:
+    playbackURL = ''
+    if playbackType == 0:
+        for mediaURL in mediaURLs:
+            if mediaURL.qualityDesc == 'original':
+                playbackURL = mediaURL.url
+
+    else:
+        options = []
+        for mediaURL in mediaURLs:
             options.append(mediaURL.qualityDesc)
-    ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
+        ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
+        playbackURL = mediaURLs[ret].url
 
-
-    item = xbmcgui.ListItem(path=mediaURLs[ret].url)
+    item = xbmcgui.ListItem(path=playbackURL)
     item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 

@@ -1,5 +1,9 @@
+Version 0.1.7
 - support up to 300 friends
 - add latest feeed
+- issue fixed: For quality to user default #2
+- playback=0 for original quality, playback=1 or playback=2 for ask stream
+- issue fixed: Handle special characters in titles of media and folders #8
 Version 0.1.6
 - add build STRM
 - automatic build of STRM support for 1) your hive, 2) your folders, 3) individual files, 4) friend's hive, 5) search results

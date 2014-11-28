@@ -16,6 +16,7 @@
 
 
 '''
+import urllib
 
 #
 #
@@ -27,6 +28,9 @@ class folder:
     def __init__(self, id, title):
         self.id = id
         self.title = title
+
+    def displayTitle(self):
+        return urllib.unquote(self.title)
 
 
     def __repr__(self):
