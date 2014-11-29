@@ -581,7 +581,8 @@ elif mode == 'video' or mode == 'audio':
         playbackURL = mediaURLs[ret].url
 
     item = xbmcgui.ListItem(path=playbackURL)
-    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
+#    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
+#    item.setInfo( type="Video")
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 #play a video given its exact-title
