@@ -115,14 +115,17 @@ class hive(cloudservice):
             self.library = gSpreadsheets.gSpreadsheets(self.addon,self.crashreport,self.user_agent)
 
             spreadsheets = self.library.getSpreadsheetList()
-            for title in spreadsheets.iterkeys():
-                if title == 'Hive':
-                    worksheets = self.library.getSpreadsheetWorksheets(spreadsheets[title])
 
-#                    for worksheet in worksheets.iterkeys():
-#                        if worksheet == 'schedule':
-#                            shows = tvScheduler.getShows(worksheets[worksheet] ,channel)
+            worksheets = self.library.getSpreadsheetWorksheets(spreadsheets['Hive'])
 
+            self.worksheet = ''
+            try:
+                self.worksheet = worksheets['content']
+            except:
+                self.worksheet = self.library.createWorksheet(spreadsheets['Hive'],'content',10,5)
+
+            self.buildSpreadsheet('','')
+            #self.library.createRow(self.worksheet)
 
 
     ##
@@ -275,11 +278,6 @@ class hive(cloudservice):
         response.close()
 
         mediaFiles = []
-
-#        if folderName == '':
-#            media = package.package(0,folder.folder('FRIENDS','<<Friends>>'))
-#            mediaFiles.append(media)
-
 
 
         if folderName == 'FRIENDS':
@@ -631,6 +629,28 @@ class hive(cloudservice):
 
                     strmFile.write(url+'\n')
                     strmFile.close()
+
+    def buildSpreadsheet(self, folderID='', folderName=''):
+
+
+        mediaItems = self.getMediaList(folderID,0)
+
+        if mediaItems:
+            for item in mediaItems:
+
+                url = 0
+                try:
+                    if item.file == 0:
+#                        self.library.createRow(self.worksheet, item.folder.id,item.folder.title,'','')
+                        self.buildSpreadsheet(item.folder.id,item.folder.title)
+                    else:
+                        self.library.createRow(self.worksheet, folderID,folderName,item.file.id,item.file.title)
+                except:
+                    self.library.createRow(self.worksheet, folderID,folderName,item.file.id,item.file.title)
+
+
+
+
 
 
 class MyHTTPErrorProcessor(urllib2.HTTPErrorProcessor):

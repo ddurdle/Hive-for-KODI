@@ -143,6 +143,80 @@ class gSpreadsheets:
         return spreadsheets
 
     #
+    # returns a list of spreadsheets contained in the Google Docs account
+    #
+    def createWorksheet(self,url,title,cols,rows):
+
+        header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0',  'Content-Type': 'application/atom+xml' }
+
+        entry = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:gs="http://schemas.google.com/spreadsheets/2006"><title>A worksheetdadf</title><gs:rowCount>100</gs:rowCount><gs:colCount>20</gs:colCount></entry>'
+
+        req = urllib2.Request(url, entry, header)
+
+        try:
+            response = urllib2.urlopen(req)
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return False
+
+        response_data = response.read()
+        response.close()
+
+        return True
+
+    #
+    # returns a list of spreadsheets contained in the Google Docs account
+    #
+    def createRow(self,url, folderID, folderName, fileID, fileName):
+
+
+
+#        url = 'https://spreadsheets.google.com/feeds/cells/1Y7oocbj4-jbvuRqEmB63Iby2exQxex32zEMKpqVoXy8/od6/private/full'
+        header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0',  'Content-Type': 'application/atom+xml'}
+
+        entry = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended"> <gsx:foldername>'+folderName+'</gsx:foldername> <gsx:folderuid>'+folderID+'</gsx:folderuid> <gsx:filename>'+fileName+'</gsx:filename> <gsx:fileuid>'+fileID+'</gsx:fileuid>  <gsx:season>1</gsx:season>  <gsx:episode>1</gsx:episode> <gsx:watched>1</gsx:watched> <gsx:sequence>1</gsx:sequence></entry>'
+
+        req = urllib2.Request(url, entry, header)
+#        req.get_method = lambda: 'PUT'
+
+        try:
+            response = urllib2.urlopen(req)
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return False
+
+        response_data = response.read()
+        response.close()
+
+        return True
+
+    #
+    # returns a list of spreadsheets contained in the Google Docs account
+    #
+    def createHeaderRow(self,url):
+
+
+
+#        url = 'https://spreadsheets.google.com/feeds/cells/1Y7oocbj4-jbvuRqEmB63Iby2exQxex32zEMKpqVoXy8/od6/private/full'
+        header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0',  "If-Match" : '*', 'Content-Type': 'application/atom+xml'}
+
+        entry = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended"> <gsx:hours>1</gsx:hours></entry>'
+
+        req = urllib2.Request(url, entry, header)
+#        req.get_method = lambda: 'PUT'
+
+        try:
+            response = urllib2.urlopen(req)
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return False
+
+        response_data = response.read()
+        response.close()
+
+        return True
+
+    #
     # returns a list of worksheets contained in the Google Docs Spreadsheet
     #
     def getSpreadsheetWorksheets(self,url):
