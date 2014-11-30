@@ -229,6 +229,10 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
+        media = {}
+        if self.isLibrary and folderName != '':
+            media = self.library.getMediaInformation(self.worksheet, folderName)
+
 
         if folderName=='' or userID != '':
             url = 'https://api-beta.hive.im/api/hive/get/'

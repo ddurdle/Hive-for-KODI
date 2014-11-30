@@ -170,14 +170,11 @@ class gSpreadsheets:
     def createRow(self,url, folderID, folderName, fileID, fileName):
 
 
-
-#        url = 'https://spreadsheets.google.com/feeds/cells/1Y7oocbj4-jbvuRqEmB63Iby2exQxex32zEMKpqVoXy8/od6/private/full'
         header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0',  'Content-Type': 'application/atom+xml'}
 
         entry = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended"> <gsx:foldername>'+folderName+'</gsx:foldername> <gsx:folderuid>'+folderID+'</gsx:folderuid> <gsx:filename>'+fileName+'</gsx:filename> <gsx:fileuid>'+fileID+'</gsx:fileuid>  <gsx:season>1</gsx:season>  <gsx:episode>1</gsx:episode> <gsx:watched>1</gsx:watched> <gsx:sequence>1</gsx:sequence></entry>'
 
         req = urllib2.Request(url, entry, header)
-#        req.get_method = lambda: 'PUT'
 
         try:
             response = urllib2.urlopen(req)
@@ -195,15 +192,11 @@ class gSpreadsheets:
     #
     def createHeaderRow(self,url):
 
-
-
-#        url = 'https://spreadsheets.google.com/feeds/cells/1Y7oocbj4-jbvuRqEmB63Iby2exQxex32zEMKpqVoXy8/od6/private/full'
         header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0',  "If-Match" : '*', 'Content-Type': 'application/atom+xml'}
 
         entry = '<?xml version=\'1.0\' encoding=\'UTF-8\'?><entry xmlns="http://www.w3.org/2005/Atom" xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended"> <gsx:hours>1</gsx:hours></entry>'
 
         req = urllib2.Request(url, entry, header)
-#        req.get_method = lambda: 'PUT'
 
         try:
             response = urllib2.urlopen(req)
@@ -296,6 +289,48 @@ class gSpreadsheets:
 
 
         return shows
+
+
+    def getMediaInformation(self,url,folderID):
+
+        header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0' }
+
+        params = urllib.urlencode({'folderuid': folderID})
+        url = url + '?sq=' + params
+
+
+        media = {}
+        while True:
+            req = urllib2.Request(url, None, header)
+
+            try:
+                response = urllib2.urlopen(req)
+            except urllib2.URLError, e:
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                return
+
+            response_data = response.read()
+
+            count=0;
+            for r in re.finditer('<gsx:foldername>([^<]*)</gsx:foldername><gsx:folderuid>([^<]*)</gsx:folderuid><gsx:filename>([^<]*)</gsx:filename><gsx:fileuid>([^<]*)</gsx:fileuid><gsx:season>([^<]*)</gsx:season><gsx:episode>([^<]*)</gsx:episode><gsx:watched>([^<]*)</gsx:watched><gsx:sequence>([^<]*)</gsx:sequence>' ,
+                             response_data, re.DOTALL):
+                media[count] = r.groups()
+                count = count + 1
+
+            nextURL = ''
+            for r in re.finditer('<link rel=\'next\' type=\'[^\']+\' href=\'([^\']+)\'' ,
+                             response_data, re.DOTALL):
+                nextURL = r.groups()
+
+            response.close()
+
+            if nextURL == '':
+                break
+            else:
+                url = nextURL[0]
+
+
+        return media
 
     def getVideo(self,url,show):
         header = { 'User-Agent' : self.user_agent, 'Authorization' : 'GoogleLogin auth=%s' % self.authorization.getToken('wise'), 'GData-Version' : '3.0' }
