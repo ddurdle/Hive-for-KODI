@@ -353,6 +353,16 @@ if mode == 'main' or mode == 'folder':
                             addMediaFile(service, isQuickLink, playbackType, item)
                     except:
                         addMediaFile(service, isQuickLink, playbackType, item)
+            elif isSorted == "1":
+                for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, playbackType, item)
+                    except:
+                        addMediaFile(service, isQuickLink, playbackType, item)
             else:
                 for item in mediaItems:
 
@@ -482,6 +492,16 @@ elif mode == 'search':
         if mediaItems:
             if isSorted == "0":
                 for item in sorted(mediaItems, key=lambda package: package.sortTitle):
+
+                    try:
+                        if item.file == 0:
+                            addDirectory(service, item.folder)
+                        else:
+                            addMediaFile(service, isQuickLink, playbackType, item)
+                    except:
+                        addMediaFile(service, isQuickLink, playbackType, item)
+            elif isSorted == "1":
+                for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
 
                     try:
                         if item.file == 0:

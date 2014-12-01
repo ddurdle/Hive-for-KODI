@@ -254,11 +254,11 @@ class hive(cloudservice):
             elif userID != '':
                 response = opener.open(request, 'userId='+userID)
             elif folderName=='FEED':
-                response = opener.open(request, 'offset=0&limit=50')
+                response = opener.open(request, 'offset=0&limit=100')
             elif folderName=='FRIENDS':
                 response = opener.open(request, 'offset=0&limit=300')
             else:
-                response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
+                response = opener.open(request, 'parentId='+folderName+'&offset=0&limit=300&order=dateModified&sort=desc')
 
         #maybe authorization key expired?
         except urllib2.URLError, e:
@@ -636,11 +636,12 @@ class hive(cloudservice):
 
 
                 if url != 0:
-                    filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
-                    strmFile = open(filename, "w")
+                    if not os.path.exists(path + item.file.title+'.strm'):
+                        filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
+                        strmFile = open(filename, "w")
 
-                    strmFile.write(url+'\n')
-                    strmFile.close()
+                        strmFile.write(url+'\n')
+                        strmFile.close()
 
     def buildSpreadsheet(self, folderID='', folderName=''):
 
