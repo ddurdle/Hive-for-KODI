@@ -37,10 +37,15 @@ class file:
         self.type = type
         self.fanart = fanart
         self.thumbnail = thumbnail
-        self.album = ''
-        self.genre = ''
-        self.year = ''
-        self.artist = ''
+        self.hasMeta = False
+
+    def setAlbumMeta(self,album,artist,releaseDate,trackNumber,genre):
+        self.album = album
+        self.artist = artist
+        self.trackNumber = trackNumber
+        self.genre = genre
+        self.releaseDate = releaseDate
+        self.hasMeta = True
 
     def displayTitle(self):
         return urllib.unquote(self.title)

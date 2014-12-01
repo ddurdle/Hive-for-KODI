@@ -1,3 +1,4 @@
+- scrape music tags
 Version 0.1.7
 - support up to 300 friends
 - add latest feeed

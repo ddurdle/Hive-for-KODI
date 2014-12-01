@@ -52,7 +52,10 @@ def addMediaFile(service, isQuickLink, playbackType, package):
                                 thumbnailImage=package.file.thumbnail)
 
     if package.file.type == package.file.AUDIO:
-        infolabels = decode_dict({ 'title' : package.file.displayTitle() })
+        if package.file.hasMeta:
+            infolabels = decode_dict({ 'title' : package.file.displayTitle(), 'tracknumber' : package.file.trackNumber, 'artist': package.file.artist, 'album': package.file.album,'genre': package.file.genre,'premiered': package.file.releaseDate })
+        else:
+            infolabels = decode_dict({ 'title' : package.file.displayTitle() })
         listitem.setInfo('Music', infolabels)
         playbackURL = '?mode=audio'
     elif package.file.type == package.file.VIDEO:

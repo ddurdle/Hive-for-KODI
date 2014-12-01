@@ -349,13 +349,21 @@ class hive(cloudservice):
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,thumbnail,downloadURL = q.groups()
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,hdImage,thumbnail,downloadURL = q.groups()
+
                     fileName = urllib.quote(fileName)
                     downloadURL = re.sub('\\\\', '', downloadURL)
                     thumbnail = re.sub('\\\\', '', thumbnail)
+                    hdImage = re.sub('\\\\', '', hdImage)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, fanart, thumbnail),folder.folder('',''))
+                    musicFile = file.file(fileID, fileName, fileName, self.AUDIO, hdImage, thumbnail)
+
+                    for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
+                        artist,album,releaseDate,trackNumber,genre = s.groups()
+                        musicFile.setAlbumMeta(album,artist,releaseDate,trackNumber,genre)
+
+                    media = package.package(musicFile,folder.folder('',''))
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
