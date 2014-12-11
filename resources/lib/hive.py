@@ -349,6 +349,17 @@ class hive(cloudservice):
                     media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                     mediaFiles.append(media)
 
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,thumbnail,downloadURL = q.groups()
+                    fileName = urllib.quote(fileName)
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    thumbnail = re.sub('\\\\', '', thumbnail)
+
+                    media = package.package(file.file(fileID, fileName, fileName, self.PICTURE, fanart, thumbnail),folder.folder('',''))
+                    media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
+                    mediaFiles.append(media)
+
+
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
                     fileID,fileName,hdImage,thumbnail,downloadURL = q.groups()
 
@@ -593,6 +604,11 @@ class hive(cloudservice):
                     downloadURL = re.sub('\\\\', '', downloadURL)
                     mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
 
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                    fileID,fileName,downloadURL = q.groups()
+                    downloadURL = re.sub('\\\\', '', downloadURL)
+                    mediaURLs.append(mediaurl.mediaurl(downloadURL, 'original', 0, 3))
+
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
                     fileID,fileName,downloadURL = q.groups()
                     downloadURL = re.sub('\\\\', '', downloadURL)
@@ -661,6 +677,51 @@ class hive(cloudservice):
                 except:
                     self.library.createRow(self.worksheet, folderID,folderName,item.file.id,item.file.title)
 
+    def downloadPicture(self, url, file):
+
+        tokenValue = self.authorization.getToken('token')
+
+
+        #token not set?  try logging in; if still fail, report error
+        if (tokenValue == ''):
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+        req = urllib2.Request(url)
+
+        # if action fails, validate login
+        try:
+            open(file,'wb').write(urllib2.urlopen(req).read())
+
+        except urllib2.URLError, e:
+            self.login()
+
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
+
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+            opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+            req = urllib2.Request(url)
+            try:
+                open(file,'wb').write(urllib2.urlopen(req).read())
+            except urllib2.URLError, e:
+                log(str(e), True)
+                return
 
 
 

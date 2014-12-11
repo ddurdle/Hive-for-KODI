@@ -31,6 +31,11 @@
         <setting label="30072" type="lsep"/>
         <setting id="crashreport_ident"  type="text" label="30080" />
     </category>
+    <category label="30065">
+        <setting label="30066" type="lsep"/>
+        <setting id="context_photo" type="enum" subsetting="true" label="30068" values="Photos only|Music and Photos|Everything" default="0"/>
+        <setting id="photo_folder" type="folder" label="30067" default="" />
+    </category>
     <category label="30021">
 <!--        <setting type="action" label="30018" option="close" action="RunPlugin(plugin://plugin.video.hive/?mode=clearauth)"/>-->
 

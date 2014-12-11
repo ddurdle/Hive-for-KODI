@@ -62,9 +62,13 @@ def addMediaFile(service, isQuickLink, playbackType, package):
         infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
         listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
+    elif package.file.type == package.file.PICTURE:
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
+        listitem.setInfo('Pictures', infolabels)
+        playbackURL = '?mode=photo'
     else:
         infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
-        listitem.setInfo('Video', infolabels)
+        llistitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
 
     listitem.setProperty('IsPlayable', 'true')
@@ -79,7 +83,7 @@ def addMediaFile(service, isQuickLink, playbackType, package):
         cleanURL = ''
 
 #    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
-    url = PLUGIN_URL+'?mode=video&title='+package.file.title+'&filename='+package.file.id
+    url = PLUGIN_URL+playbackURL+'&title='+package.file.title+'&filename='+package.file.id
 
 
     cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&filename='+package.file.id+')', ))
@@ -607,6 +611,107 @@ elif mode == 'video' or mode == 'audio':
 #    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
 #    item.setInfo( type="Video")
     xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+
+elif mode == 'photo':
+
+    filename = plugin_queries['filename']
+    try:
+        directory = plugin_queries['directory']
+    except:
+        directory = ''
+
+    try:
+        title = plugin_queries['title']
+    except:
+        title = ''
+
+    try:
+        playbackType = plugin_queries['playback']
+    except:
+        try:
+            playbackType = int(addon.getSetting('playback_type'))
+        except:
+            playbackType = 0
+
+
+    instanceName = ''
+    try:
+        instanceName = plugin_queries['instance']
+    except:
+        pass
+
+    # show index of accounts
+    if instanceName == '':
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+
+                            #let's log in
+                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+    elif instanceName != '':
+
+            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+    try:
+            service
+    except NameError:
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
+            xbmcplugin.endOfDirectory(plugin_handle)
+
+
+    path = ''
+    try:
+        path = addon.getSetting('photo_folder')
+    except:
+        pass
+
+    import os.path
+
+    if not os.path.exists(path):
+        path = ''
+
+    while path == '':
+        path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30038), 'files','',False,False,'')
+        if not os.path.exists(path):
+            path = ''
+        else:
+            addon.setSetting('photo_folder', path)
+
+
+
+    mediaFile = file.file(filename, title, '', 0, '','')
+    mediaFolder = folder.folder(directory,directory)
+    mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
+
+    playbackURL = ''
+    for mediaURL in mediaURLs:
+            if mediaURL.qualityDesc == 'original':
+                playbackURL = mediaURL.url
+
+    import xbmcvfs
+    xbmcvfs.mkdir(path + '/'+str(directory))
+    try:
+        xbmcvfs.rmdir(path + '/'+str(directory)+'/'+str(title))
+    except:
+        pass
+
+    service.downloadPicture(playbackURL, path + '/'+str(directory) + '/'+str(title))
+    xbmc.executebuiltin("XBMC.ShowPicture("+path + '/'+str(directory) + '/'+str(title)+")")
+
 
 #play a video given its exact-title
 elif mode == 'streamurl':
