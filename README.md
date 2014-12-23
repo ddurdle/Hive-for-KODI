@@ -55,6 +55,10 @@ Report Issues to this thread or create an issue in GitHub -> https://github.com/
 
 Before starting the add-on for the first time, either "Configure" or right click and select "Add-on Settings". Enter your fully-qualified Username and Password.
 
+Contributions and Thanks
+- code contribution from JoKeRzBoX
+- donation support from iorifly
+
 FAQ:
 
 1) Is there support for multiple accounts?

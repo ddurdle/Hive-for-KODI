@@ -138,7 +138,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
         opener.addheaders = [('User-Agent', self.user_agent)]
 
-        url = 'https://api-beta.hive.im/api/user/sign-in/'
+        url = 'https://api.hive.im/api/user/sign-in/'
 
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
@@ -235,13 +235,13 @@ class hive(cloudservice):
 
 
         if folderName=='' or userID != '':
-            url = 'https://api-beta.hive.im/api/hive/get/'
+            url = 'https://api.hive.im/api/hive/get/'
         elif folderName=='FRIENDS':
-            url = 'https://api-beta.hive.im/api/user/get-friends-list/'
+            url = 'https://api.hive.im/api/user/get-friends-list/'
         elif folderName=='FEED':
-            url = 'https://api-beta.hive.im/api/activity/get/'
+            url = 'https://api.hive.im/api/activity/get/'
         else:
-            url = 'https://api-beta.hive.im/api/hive/get-children/'
+            url = 'https://api.hive.im/api/hive/get-children/'
 
         request = urllib2.Request(url)
 
@@ -271,8 +271,12 @@ class hive(cloudservice):
                         response = opener.open(request)
                     elif userID != '':
                         response = opener.open(request, 'userId='+userID)
+                    elif folderName=='FEED':
+                        response = opener.open(request, 'offset=0&limit=100')
+                    elif folderName=='FRIENDS':
+                        response = opener.open(request, 'offset=0&limit=300')
                     else:
-                        response = opener.open(request, 'parentId='+folderName+'&offset=0&order=dateModified&sort=desc')
+                        response = opener.open(request, 'parentId='+folderName+'&offset=0&limit=300&order=dateModified&sort=desc')
                 except urllib2.URLError, e:
                     xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
                     self.crashreport.sendError('getMediaList',str(e))
@@ -342,7 +346,7 @@ class hive(cloudservice):
                 # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
                 has_thumb = re.search(',\"thumb\"\:\"',entry)
                 if has_thumb:
- 
+
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
                         fileID,fileName,thumbnail,downloadURL = q.groups()
                         fileName = urllib.quote(fileName)
@@ -381,7 +385,7 @@ class hive(cloudservice):
                         media = package.package(musicFile,folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
-                
+
                 else:
 
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
@@ -428,7 +432,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api-beta.hive.im/api/user/get/'
+        url = 'https://api.hive.im/api/user/get/'
 
         request = urllib2.Request(url)
 
@@ -549,7 +553,7 @@ class hive(cloudservice):
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
 
-        url = 'https://api-beta.hive.im/api/hive/get-streams/'
+        url = 'https://api.hive.im/api/hive/get-streams/'
 
 
         request = urllib2.Request(url)
@@ -592,7 +596,7 @@ class hive(cloudservice):
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
 
-        url = 'https://api-beta.hive.im/api/hive/get-child/'
+        url = 'https://api.hive.im/api/hive/get-child/'
 
 
         request = urllib2.Request(url)
