@@ -339,44 +339,65 @@ class hive(cloudservice):
                     media = package.package(0,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,thumbnail,downloadURL = q.groups()
-                    fileName = urllib.quote(fileName)
-                    downloadURL = re.sub('\\\\', '', downloadURL)
-                    thumbnail = re.sub('\\\\', '', thumbnail)
+                # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
+                has_thumb = re.search(',\"thumb\"\:\"',entry)
+                if has_thumb:
+ 
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL = q.groups()
+                        fileName = urllib.quote(fileName)
+                        downloadURL = re.sub('\\\\', '', downloadURL)
+                        thumbnail = re.sub('\\\\', '', thumbnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail),folder.folder('',''))
-                    media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
-                    mediaFiles.append(media)
+                        media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail),folder.folder('',''))
+                        media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
+                        mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,thumbnail,downloadURL = q.groups()
-                    fileName = urllib.quote(fileName)
-                    downloadURL = re.sub('\\\\', '', downloadURL)
-                    thumbnail = re.sub('\\\\', '', thumbnail)
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL = q.groups()
+                        fileName = urllib.quote(fileName)
+                        downloadURL = re.sub('\\\\', '', downloadURL)
+                        thumbnail = re.sub('\\\\', '', thumbnail)
 
-                    media = package.package(file.file(fileID, fileName, fileName, self.PICTURE, fanart, thumbnail),folder.folder('',''))
-                    media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
-                    mediaFiles.append(media)
+                        media = package.package(file.file(fileID, fileName, fileName, self.PICTURE, fanart, thumbnail),folder.folder('',''))
+                        media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
+                        mediaFiles.append(media)
 
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                    fileID,fileName,hdImage,thumbnail,downloadURL = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,hdImage,thumbnail,downloadURL = q.groups()
 
-                    fileName = urllib.quote(fileName)
-                    downloadURL = re.sub('\\\\', '', downloadURL)
-                    thumbnail = re.sub('\\\\', '', thumbnail)
-                    hdImage = re.sub('\\\\', '', hdImage)
+                        fileName = urllib.quote(fileName)
+                        downloadURL = re.sub('\\\\', '', downloadURL)
+                        thumbnail = re.sub('\\\\', '', thumbnail)
+                        hdImage = re.sub('\\\\', '', hdImage)
 
-                    musicFile = file.file(fileID, fileName, fileName, self.AUDIO, hdImage, thumbnail)
+                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, hdImage, thumbnail)
 
-                    for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
-                        artist,album,releaseDate,trackNumber,genre = s.groups()
-                        musicFile.setAlbumMeta(album,artist,releaseDate,trackNumber,genre)
+                        for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
+                            artist,album,releaseDate,trackNumber,genre = s.groups()
+                            musicFile.setAlbumMeta(album,artist,releaseDate,trackNumber,genre)
 
-                    media = package.package(musicFile,folder.folder('',''))
-                    media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
-                    mediaFiles.append(media)
+                        media = package.package(musicFile,folder.folder('',''))
+                        media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
+                        mediaFiles.append(media)
+                
+                else:
+
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,downloadURL = q.groups()
+                        fileName = urllib.quote(fileName)
+                        downloadURL = re.sub('\\\\', '', downloadURL)
+
+                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, '', '')
+
+                        for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
+                            artist,album,releaseDate,trackNumber,genre = s.groups()
+                            musicFile.setAlbumMeta(album,artist,releaseDate,trackNumber,genre)
+
+                        media = package.package(musicFile,folder.folder('',''))
+                        media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
+                        mediaFiles.append(media)
 
         return mediaFiles
 
