@@ -289,16 +289,17 @@ class hive(cloudservice):
 
 
         if folderName == 'FRIENDS':
-            for r in re.finditer('\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
-                userID,userName,userFirst,userLast = r.groups()
+            for r in re.finditer('\"thumbnail\"\:\"([^\"]+)\".*?\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
+                thumb,userID,userName,userFirst,userLast = r.groups()
+                thumbURL = re.sub('"', '', re.sub('\\\/', '/', thumb))
                 userName = re.sub('"', '', userName)
                 userFirst = re.sub('"', '', userFirst)
                 userLast = re.sub('"', '', userLast)
 
                 if userName != 'null':
-                    media = package.package(0,folder.folder('u='+userID+'f=0',userName))
+                    media = package.package(0,folder.folder('u='+userID+'f=0',userName, thumbURL))
                 else:
-                    media = package.package(0,folder.folder('u='+userID+'f=0',userFirst + ' - '+userLast))
+                    media = package.package(0,folder.folder('u='+userID+'f=0',userFirst + ' - '+userLast, thumbURL))
 
                 mediaFiles.append(media)
 
