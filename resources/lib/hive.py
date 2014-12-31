@@ -93,6 +93,29 @@ class hive(cloudservice):
         self.authorization = authorization.authorization(username)
 
 
+        self.isPremium = True
+        try:
+            if int(self.addon.getSetting(self.instanceName+'_type')) == 1:
+                self.isPremium = True
+            else:
+                self.isPremium = False
+        except:
+            self.isPremium = True
+
+        try:
+            if self.isPremium:
+                self.skipUnwatchable = self.addon.getSetting('hide_unwatchable')
+            else:
+                self.skipUnwatchable = self.addon.getSetting('free_hide_unwatchable')
+        except:
+            self.skipUnwatchable = False
+
+        if self.skipUnwatchable == 'true':
+            self.skipUnwatchable = True
+        else:
+            self.skipUnwatchable = False
+
+
         self.cookiejar = cookielib.CookieJar()
 
         self.user_agent = user_agent
@@ -365,13 +388,21 @@ class hive(cloudservice):
                 has_thumb = re.search(',\"thumb\"\:\"',entry)
                 if has_thumb:
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                        fileID,fileName,thumbnail,downloadURL = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\".*?\"encoded\"\:([^\,]+)\,' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL,isEncoded = q.groups()
+
+                        if isEncoded.lower() == 'false' and self.skipUnwatchable == True:
+                            break
+
                         fileName = urllib.quote(fileName)
                         downloadURL = re.sub('\\\\', '', downloadURL)
                         thumbnail = re.sub('\\\\', '', thumbnail)
 
-                        media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail),folder.folder('',''))
+                        mediaFile = file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail)
+                        if isEncoded.lower() == 'true':
+                            mediaFile.isEncoded = True
+
+                        media = package.package(mediaFile,folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
 
@@ -926,4 +957,3 @@ class MyHTTPErrorProcessor(urllib2.HTTPErrorProcessor):
         return response
 
     https_response = http_response
-

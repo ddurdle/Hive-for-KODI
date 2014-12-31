@@ -2,15 +2,23 @@
 <settings>
     <category label="30020">
         <setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
-        <setting label="30009" type="lsep"/>
-        <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>
+        <setting id="sorted" type="enum" label="30054" values="alphabetical|reverse alphabetical|Hive default order" default="0"/>
+
+<!--        <setting label="30009" type="lsep"/>
+        <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>-->
 <!--        <setting id="playback_delay" type="enum" label="30014" visible="eq(-1,1)" values="until downloaded|seconds"/>
         <setting id="playback_seconds" type="text" label="30019" visible="eq(-1,1)" default="5"/>
         <setting id="cache_folder_default" type="enum" label="30011" visible="eq(-3,1)" values="../settings/cache/|custom"/>
         <setting id="cache_folder" type="folder" label="30012" visible="eq(-1,1)" default="special://profile/addon_data/plugin.video.hive/cache"/>
         <setting type="lsep"/>
         <setting id="playback_links" type="bool" label="30013" default="true"/>-->
-        <setting id="sorted" type="enum" label="30054" values="alphabetical|reverse alphabetical|Hive default order" default="0"/>
+        <setting label="30083" type="lsep"/>
+        <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>
+        <setting id="hide_unwatchable" type="bool" label="30085" default="false"/>
+        <setting label="30084" type="lsep"/>
+        <setting id="free_playback_type" type="enum" label="30006" values="Always original quality|240p|Always ask" default="1"/>
+        <setting id="free_hide_unwatchable" type="bool" label="30085" default="true"/>
+
     </category>
 <!-->    <category label="30060">
         <setting label="30061" type="lsep"/>
@@ -43,55 +51,55 @@
         <setting id="hive_numaccounts" type="integer" hidden="true" default="10" label="30022" />
         <setting id="accounts" type="labelenum" values="1|2|3|4|5|6|7|8|9|10" default="1" label="" />
 
-      	<setting id="hive1_username" type="text" label="30001" visible="eq(-1,0)" default="" />
-    	<setting id="hive1_password" type="text" label="30002" visible="eq(-2,0)" option="hidden" default="" />
+        <setting id="hive1_username" type="text" label="30001" visible="eq(-1,0)" default="" />
+        <setting id="hive1_password" type="text" label="30002" visible="eq(-2,0)" option="hidden" default="" />
         <setting id="hive1_save_auth_token" type="bool" label="30005" visible="eq(-3,0)" default="true" />
+        <setting id="hive1_type" type="enum" label="30082" visible="eq(-4,0)" values="non-premium or free|premium" default="0" />
 
 
-        <setting id="hive2_username" type="text" label="30001" visible="eq(-4,1)" default="" />
-        <setting id="hive2_password" type="text" label="30002" visible="eq(-5,1)" option="hidden" default="" />
-        <setting id="hive2_save_auth_token" type="bool" label="30005" visible="eq(-6,1)" default="true" />
+        <setting id="hive2_username" type="text" label="30001" visible="eq(-5,1)" default="" />
+        <setting id="hive2_password" type="text" label="30002" visible="eq(-6,1)" option="hidden" default="" />
+        <setting id="hive2_save_auth_token" type="bool" label="30005" visible="eq(-7,1)" default="true" />
+        <setting id="hive2_type" type="enum" label="30082" visible="eq(-8,1)" values="non-premium or free|premium" default="0" />
 
+        <setting id="hive3_username" type="text" label="30001" visible="eq(-9,2)" default="" />
+        <setting id="hive3_password" type="text" label="30002" visible="eq(-10,2)" option="hidden" default="" />
+        <setting id="hive3_save_auth_token" type="bool" label="30005" visible="eq(-11,2)" default="true" />
+        <setting id="hive3_type" type="enum" label="30082" visible="eq(-12,2)" values="non-premium or free|premium" default="0" />
 
-        <setting id="hive3_username" type="text" label="30001" visible="eq(-7,2)" default="" />
-        <setting id="hive3_password" type="text" label="30002" visible="eq(-8,2)" option="hidden" default="" />
-        <setting id="hive3_save_auth_token" type="bool" label="30005" visible="eq(-9,2)" default="true" />
+        <setting id="hive4_username" type="text" label="30001" visible="eq(-13,3)" default="" />
+        <setting id="hive4_password" type="text" label="30002" visible="eq(-14,3)" option="hidden" default="" />
+        <setting id="hive4_save_auth_token" type="bool" label="30005" visible="eq(-15,3)" default="true" />
+        <setting id="hive4_type" type="enum" label="30082" visible="eq(-16,3)" values="non-premium or free|premium" default="0" />
 
+        <setting id="hive5_username" type="text" label="30001" visible="eq(-17,4)" default="" />
+        <setting id="hive5_password" type="text" label="30002" visible="eq(-18,4)" option="hidden" default="" />
+        <setting id="hive5_save_auth_token" type="bool" label="30005" visible="eq(-19,4)" default="true" />
+        <setting id="hive5_type" type="enum" label="30082" visible="eq(-20,4)" values="non-premium or free|premium" default="0" />
 
-        <setting id="hive4_username" type="text" label="30001" visible="eq(-10,3)" default="" />
-        <setting id="hive4_password" type="text" label="30002" visible="eq(-11,3)" option="hidden" default="" />
-        <setting id="hive4_save_auth_token" type="bool" label="30005" visible="eq(-12,3)" default="true" />
+        <setting id="hive6_username" type="text" label="30001" visible="eq(-21,5)" default="" />
+        <setting id="hive6_password" type="text" label="30002" visible="eq(-22,5)" option="hidden" default="" />
+        <setting id="hive6_save_auth_token" type="bool" label="30005" visible="eq(-23,5)" default="true" />
+        <setting id="hive6_type" type="enum" label="30082" visible="eq(-24,5)" values="non-premium or free|premium" default="0" />
 
+        <setting id="hive7_username" type="text" label="30001" visible="eq(-25,6)" default="" />
+        <setting id="hive7_password" type="text" label="30002" visible="eq(-26,6)" option="hidden" default="" />
+        <setting id="hive7_save_auth_token" type="bool" label="30005" visible="eq(-27,6)" default="true" />
+        <setting id="hive7_type" type="enum" label="30082" visible="eq(-28,6)" values="non-premium or free|premium" default="0" />
 
-        <setting id="hive5_username" type="text" label="30001" visible="eq(-13,4)" default="" />
-        <setting id="hive5_password" type="text" label="30002" visible="eq(-14,4)" option="hidden" default="" />
-        <setting id="hive5_save_auth_token" type="bool" label="30005" visible="eq(-15,4)" default="true" />
+        <setting id="hive8_username" type="text" label="30001" visible="eq(-29,7)" default="" />
+        <setting id="hive8_password" type="text" label="30002" visible="eq(-30,7)" option="hidden" default="" />
+        <setting id="hive8_save_auth_token" type="bool" label="30005" visible="eq(-31,7)" default="true" />
+        <setting id="hive8_type" type="enum" label="30082" visible="eq(-32,7)" values="non-premium or free|premium" default="0" />
 
+        <setting id="hive9_username" type="text" label="30001" visible="eq(-33,8)" default="" />
+        <setting id="hive9_password" type="text" label="30002" visible="eq(-34,8)" option="hidden" default="" />
+        <setting id="hive9_save_auth_token" type="bool" label="30005" visible="eq(-35,8)" default="true" />
+        <setting id="hive9_type" type="enum" label="30082" visible="eq(-36,8)" values="non-premium or free|premium" default="0" />
 
-        <setting id="hive6_username" type="text" label="30001" visible="eq(-16,5)" default="" />
-        <setting id="hive6_password" type="text" label="30002" visible="eq(-17,5)" option="hidden" default="" />
-        <setting id="hive6_save_auth_token" type="bool" label="30005" visible="eq(-18,5)" default="true" />
-
-
-        <setting id="hive7_username" type="text" label="30001" visible="eq(-19,6)" default="" />
-        <setting id="hive7_password" type="text" label="30002" visible="eq(-20,6)" option="hidden" default="" />
-        <setting id="hive7_save_auth_token" type="bool" label="30005" visible="eq(-21,6)" default="true" />
-
-
-        <setting id="hive8_username" type="text" label="30001" visible="eq(-22,7)" default="" />
-        <setting id="hive8_password" type="text" label="30002" visible="eq(-23,7)" option="hidden" default="" />
-        <setting id="hive8_save_auth_token" type="bool" label="30005" visible="eq(-24,7)" default="true" />
-
-
-        <setting id="hive9_username" type="text" label="30001" visible="eq(-25,8)" default="" />
-        <setting id="hive9_password" type="text" label="30002" visible="eq(-26,8)" option="hidden" default="" />
-        <setting id="hive9_save_auth_token" type="bool" label="30005" visible="eq(-27,8)" default="true" />
-
-
-        <setting id="hive10_username" type="text" label="30001" visible="eq(-28,9)" default="" />
-        <setting id="hive10_password" type="text" label="30002" visible="eq(-29,9)" option="hidden" default="" />
-        <setting id="hive10_save_auth_token" type="bool" label="30005" visible="eq(-30,9)" default="true" />
-
+        <setting id="hive10_username" type="text" label="30001" visible="eq(-37,9)" default="" />
+        <setting id="hive10_password" type="text" label="30002" visible="eq(-38,9)" option="hidden" default="" />
+        <setting id="hive10_save_auth_token" type="bool" label="30005" visible="eq(-39,9)" default="true" />
+        <setting id="hive10_type" type="enum" label="30082" visible="eq(-40,9)" values="non-premium or free|premium" default="0" />
     </category>
 </settings>
-

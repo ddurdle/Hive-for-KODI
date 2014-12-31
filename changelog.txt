@@ -1,3 +1,11 @@
+Version 0.2.2
+- JoKeRzBoX contribution: Show friend's logo while browsing list of friends #13
+- JoKeRzBoX contribution: Show Friend's icon/thumbnail while browsing list of friends #12
+- added non-premium/free & premium option to accounts screen
+- added ability to hide unprocessed videos (useful for non-premium / free users) -- default for non-premium
+- filtered out videos only apply to viewing hive and friend's hive (not for search or feed)
+- add ability to default to 240p playback (useful for non-premium / free users) -- default for non-premium
+- added right-click, select "Request Encoding" for non-encoded videos
 Version 0.2.1
 - cosmetic changes
 - added bookmarks

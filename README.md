@@ -17,9 +17,16 @@ What is implemented?
 - Creation of STRM files for video and audio [since 0.1.6]
 - fanart file support (include a fanart.jpg in your folder, and it will be loaded when viewing content in that folder)
 - thumbnail support
+- support for Music info [since 0.1.8]
+- photo support [since 0.1.9]
+- bookmarks [since 0.2.1]
+- saved search [since 0.2.1]
+- thumbnails added for friend's (thx to JoKeRzBoX)
+- filter out unprocessed videos (useful for non-premium / free users) -- default for non-premium [since 0.2.2]
+- default to 240p playback (useful for non-premium / free users) -- default for non-premium  [since 0.2.2]
+- option to "Request Encoding" (right-click on video) for non-encoded videos [since 0.2.2]
 
 What is being worked on?
-- photo support
 - support for Music info (priority #1)
 - support for TV info (priority #2)
 - support for Movie info (priority #3)
@@ -56,7 +63,7 @@ Report Issues to this thread or create an issue in GitHub -> https://github.com/
 Before starting the add-on for the first time, either "Configure" or right click and select "Add-on Settings". Enter your fully-qualified Username and Password.
 
 Contributions and Thanks
-- code contribution from JoKeRzBoX
+- several code contribution from JoKeRzBoX
 - donation support from iorifly
 
 FAQ:

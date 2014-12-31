@@ -85,6 +85,8 @@ def addMediaFile(service, isQuickLink, playbackType, package):
 #    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
     url = PLUGIN_URL+playbackURL+'&title='+package.file.title+'&filename='+package.file.id
 
+    if package.file.isEncoded == False:
+        cm.append(( addon.getLocalizedString(30086), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=requestencoding&title='+package.file.title+'&filename='+package.file.id+')', ))
 
     cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&filename='+package.file.id+')', ))
 #    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
@@ -240,8 +242,6 @@ if mode == 'main':
 #dump a list of videos available to play
 if mode == 'main' or mode == 'folder':
 
-    playbackType = int(addon.getSetting('playback_type'))
-
     folderName=''
 
     if (mode == 'folder'):
@@ -358,6 +358,20 @@ if mode == 'main' or mode == 'folder':
         except:
             pass
 
+        playbackType = ''
+        if service.isPremium:
+            try:
+                playbackType = int(addon.getSetting('playback_type'))
+            except:
+                playbackType = 0
+        else:
+            try:
+                playbackType = int(addon.getSetting('free_playback_type'))
+            except:
+                playbackType = 1
+
+
+
         if mediaItems:
             if isSorted == "0":
                 for item in sorted(mediaItems, key=lambda package: package.sortTitle):
@@ -393,8 +407,6 @@ if mode == 'main' or mode == 'folder':
 
 #dump a list of videos available to play
 elif mode == 'search':
-
-    playbackType = int(addon.getSetting('playback_type'))
 
     searchText = ''
     try:
@@ -512,6 +524,20 @@ elif mode == 'search':
 
         mediaItems = service.getSearchResults(searchText)
 
+
+        playbackType = ''
+        if service.isPremium:
+            try:
+                playbackType = int(addon.getSetting('playback_type'))
+            except:
+                playbackType = 0
+        else:
+            try:
+                playbackType = int(addon.getSetting('free_playback_type'))
+            except:
+                playbackType = 1
+
+
         isSorted = "0"
         try:
             isSorted = addon.getSetting('sorted')
@@ -567,14 +593,100 @@ elif mode == 'video' or mode == 'audio':
     except:
         title = ''
 
+    instanceName = ''
+    try:
+        instanceName = plugin_queries['instance']
+    except:
+        pass
+
+    # show index of accounts
+    if instanceName == '':
+
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+
+                            #let's log in
+                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+    elif instanceName != '':
+
+            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+    try:
+            service
+    except NameError:
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+            log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
+            xbmcplugin.endOfDirectory(plugin_handle)
+
+    playbackType = 0
     try:
         playbackType = plugin_queries['playback']
     except:
-        try:
-            playbackType = int(addon.getSetting('playback_type'))
-        except:
-            playbackType = 0
+        playbackType = ''
+        if service.isPremium:
+            try:
+                playbackType = int(addon.getSetting('playback_type'))
+            except:
+                playbackType = 0
+        else:
+            try:
+                playbackType = int(addon.getSetting('free_playback_type'))
+            except:
+                playbackType = 1
 
+    mediaFile = file.file(filename, title, '', 0, '','')
+    mediaFolder = folder.folder(directory,directory)
+    mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
+
+    playbackURL = ''
+    if playbackType == 0:
+        for mediaURL in mediaURLs:
+            if mediaURL.qualityDesc == 'original':
+                playbackURL = mediaURL.url
+    elif playbackType == 1 and not service.isPremium:
+        for mediaURL in mediaURLs:
+            if mediaURL.qualityDesc == '240p':
+                playbackURL = mediaURL.url
+
+    else:
+        options = []
+        for mediaURL in mediaURLs:
+            options.append(mediaURL.qualityDesc)
+        ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
+        playbackURL = mediaURLs[ret].url
+
+    item = xbmcgui.ListItem(path=playbackURL)
+#    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
+#    item.setInfo( type="Video")
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
+
+
+#play a video given its exact-title
+elif mode == 'requestencoding':
+
+    filename = plugin_queries['filename']
+    try:
+        directory = plugin_queries['directory']
+    except:
+        directory = ''
+
+    try:
+        title = plugin_queries['title']
+    except:
+        title = ''
 
     instanceName = ''
     try:
@@ -614,28 +726,12 @@ elif mode == 'video' or mode == 'audio':
             log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
-
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
-    mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
+    mediaURLs = service.getPlaybackCall(0,package.package(mediaFile,mediaFolder ))
 
-    playbackURL = ''
-    if playbackType == 0:
-        for mediaURL in mediaURLs:
-            if mediaURL.qualityDesc == 'original':
-                playbackURL = mediaURL.url
+    xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30087), title)
 
-    else:
-        options = []
-        for mediaURL in mediaURLs:
-            options.append(mediaURL.qualityDesc)
-        ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
-        playbackURL = mediaURLs[ret].url
-
-    item = xbmcgui.ListItem(path=playbackURL)
-#    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
-#    item.setInfo( type="Video")
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 elif mode == 'photo':
 
@@ -1118,4 +1214,3 @@ if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
 
 
 xbmcplugin.endOfDirectory(plugin_handle)
-

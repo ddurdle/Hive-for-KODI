@@ -38,6 +38,7 @@ class file:
         self.fanart = fanart
         self.thumbnail = thumbnail
         self.hasMeta = False
+        self.isEncoded = False
 
     def setAlbumMeta(self,album,artist,releaseDate,trackNumber,genre):
         self.album = album
@@ -60,4 +61,3 @@ class file:
 
     def getKey(self):
         return self.title
-
