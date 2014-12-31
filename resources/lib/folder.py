@@ -25,9 +25,10 @@ class folder:
 
     ##
     ##
-    def __init__(self, id, title):
+    def __init__(self, id, title, thumb=''):
         self.id = id
         self.title = title
+        self.thumb = thumb
 
     def displayTitle(self):
         return urllib.unquote(self.title)

@@ -103,7 +103,7 @@ def addDirectory(service, folder):
     if folder.id == 'SAVED-SEARCH':
         listitem = xbmcgui.ListItem('Search - ' + decode(folder.displayTitle()), iconImage='', thumbnailImage='')
     else:
-        listitem = xbmcgui.ListItem(decode(folder.displayTitle()), iconImage='', thumbnailImage='')
+        listitem = xbmcgui.ListItem(decode(folder.displayTitle()), iconImage=decode(folder.thumb), thumbnailImage=decode(folder.thumb))
     fanart = addon.getAddonInfo('path') + '/fanart.jpg'
 
 
