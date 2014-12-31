@@ -337,11 +337,28 @@ class hive(cloudservice):
         for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                processed = 0
+                for q in re.finditer('\"id\"\:\"[^\"]+\".*?\"title\"\:\"SAVED-FOLDER\|([^\|]+)\|([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     folderID,folderName = q.groups()
                     folderName = urllib.quote(folderName)
+                    folderName = '*'+str(folderName)
                     media = package.package(0,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
+                    processed = 1
+
+                for q in re.finditer('\"id\"\:\"[^\"]+\".*?\"title\"\:\"(SAVED-SEARCH)\|([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                    search,searchCriteria = q.groups()
+                    searchCriteria = urllib.quote(searchCriteria)
+                    media = package.package(0,folder.folder('SAVED-SEARCH',searchCriteria))
+                    mediaFiles.append(media)
+                    processed = 1
+
+                if processed == 0:
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                        folderID,folderName = q.groups()
+                        folderName = urllib.quote(folderName)
+                        media = package.package(0,folder.folder(folderID,folderName))
+                        mediaFiles.append(media)
 
                 # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
                 has_thumb = re.search(',\"thumb\"\:\"',entry)
@@ -412,7 +429,7 @@ class hive(cloudservice):
     #   parameters: prompt for video quality (optional), cache type (optional)
     #   returns: list of videos
     ##
-    def getSearchResults(self):
+    def getSearchResults(self, searchText):
 
         tokenValue = self.authorization.getToken('token')
 
@@ -460,15 +477,6 @@ class hive(cloudservice):
         searchAPIKey = ''
         for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
                 userID,searchAPIKey = r.groups()
-
-        searchText = ''
-        try:
-            dialog = xbmcgui.Dialog()
-            searchText = dialog.input('Enter search string', type=xbmcgui.INPUT_ALPHANUM)
-        except:
-            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30100))
-            searchText = 'life'
-            return []
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
@@ -750,6 +758,156 @@ class hive(cloudservice):
 
 
 
+    def createBookmark(self, folderID, folderName):
+
+        tokenValue = self.authorization.getToken('token')
+
+
+        #token not set?  try logging in; if still fail, report error
+        if (tokenValue == ''):
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+        url = 'https://api.hive.im/api/hive/get/'
+
+        request = urllib2.Request(url)
+
+        # if action fails, validate login
+
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('createBookmark',str(e))
+                    return
+
+        response_data = response.read()
+        response.close()
+
+        saveFolderID = 0
+        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
+
+                processed = 0
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"(Documents)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                    saveFolderID,saveFolderName = q.groups()
+
+        if saveFolderID != 0:
+            url = 'https://api.hive.im/api/hive/create/'
+
+            request = urllib2.Request(url)
+
+            # if action fails, validate login
+
+            try:
+                response = opener.open(request, 'filename=SAVED-FOLDER|'+str(folderID)+'|'+str(folderName)+'&parent='+str(saveFolderID)+'&locked=false&friends=')
+
+            except urllib2.URLError, e:
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('createBookmark',str(e))
+                    return
+
+            response.close()
+
+
+    def createSearch(self, searchCriteria):
+
+        tokenValue = self.authorization.getToken('token')
+
+
+        #token not set?  try logging in; if still fail, report error
+        if (tokenValue == ''):
+            self.login()
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+        url = 'https://api.hive.im/api/hive/get/'
+
+        request = urllib2.Request(url)
+
+        # if action fails, validate login
+
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('createBookmark',str(e))
+                    return
+
+        response_data = response.read()
+        response.close()
+
+        saveFolderID = 0
+        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+                entry = r.group()
+
+                processed = 0
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"(Documents)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                    saveFolderID,saveFolderName = q.groups()
+
+        if saveFolderID != 0:
+            url = 'https://api.hive.im/api/hive/create/'
+
+            request = urllib2.Request(url)
+
+            # if action fails, validate login
+
+            try:
+                response = opener.open(request, 'filename=SAVED-SEARCH|'+str(searchCriteria)+'&parent='+str(saveFolderID)+'&locked=false&friends=')
+
+            except urllib2.URLError, e:
+                self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'hiveId='+package.file.id)
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('createBookmark',str(e))
+                    return
+
+            response.close()
 
 
 class MyHTTPErrorProcessor(urllib2.HTTPErrorProcessor):

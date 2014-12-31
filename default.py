@@ -99,15 +99,27 @@ def addMediaFile(service, isQuickLink, playbackType, package):
                                 isFolder=False, totalItems=0)
 
 def addDirectory(service, folder):
-    listitem = xbmcgui.ListItem(decode(folder.displayTitle()), iconImage='', thumbnailImage='')
+
+    if folder.id == 'SAVED-SEARCH':
+        listitem = xbmcgui.ListItem('Search - ' + decode(folder.displayTitle()), iconImage='', thumbnailImage='')
+    else:
+        listitem = xbmcgui.ListItem(decode(folder.displayTitle()), iconImage='', thumbnailImage='')
     fanart = addon.getAddonInfo('path') + '/fanart.jpg'
+
 
     if folder.id != '':
         cm=[]
         cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        cm.append(( addon.getLocalizedString(30081), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=createbookmark&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+
         listitem.addContextMenuItems(cm, False)
     listitem.setProperty('fanart_image', fanart)
-    xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
+
+    if folder.id == 'SAVED-SEARCH':
+        xbmcplugin.addDirectoryItem(plugin_handle, PLUGIN_URL+'?mode=search&criteria='+folder.title, listitem,
+                                isFolder=True, totalItems=0)
+    else:
+        xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
                                 isFolder=True, totalItems=0)
 
 def addMenu(url,title):
@@ -335,8 +347,8 @@ if mode == 'main' or mode == 'folder':
             xbmcplugin.endOfDirectory(plugin_handle)
 
         if folderName == '':
-            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','<<Friends>>')
-            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','<<Latest Feed>>')
+            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','[Friends]')
+            addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','[Latest Feed]')
 
         mediaItems = service.getMediaList(folderName,0)
 
@@ -349,7 +361,6 @@ if mode == 'main' or mode == 'folder':
         if mediaItems:
             if isSorted == "0":
                 for item in sorted(mediaItems, key=lambda package: package.sortTitle):
-
                     try:
                         if item.file == 0:
                             addDirectory(service, item.folder)
@@ -385,6 +396,20 @@ elif mode == 'search':
 
     playbackType = int(addon.getSetting('playback_type'))
 
+    searchText = ''
+    try:
+        searchText = plugin_queries['criteria']
+    except:
+        searchText = ''
+
+    if searchText == '':
+
+            try:
+                dialog = xbmcgui.Dialog()
+                searchText = dialog.input('Enter search string', type=xbmcgui.INPUT_ALPHANUM)
+            except:
+                xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30100))
+                searchText = 'life'
 
     try:
         isQuickLink = addon.getSetting('playback_type')
@@ -485,7 +510,7 @@ elif mode == 'search':
             xbmcplugin.endOfDirectory(plugin_handle)
 
 
-        mediaItems = service.getSearchResults()
+        mediaItems = service.getSearchResults(searchText)
 
         isSorted = "0"
         try:
@@ -899,9 +924,196 @@ elif mode == 'buildstrm':
 
 
 
+#create strm files
+elif mode == 'createbookmark':
+
+        try:
+                folderID = plugin_queries['folderID']
+                title = plugin_queries['title']
+                instanceName = plugin_queries['instanceName']
+        except:
+                folderID = ''
+
+        if folderID != '':
+
+                try:
+                    username = addon.getSetting(instanceName+'_username')
+                except:
+                    username = ''
+
+                if username != '':
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+                    newTitle = ''
+                    try:
+                        dialog = xbmcgui.Dialog()
+                        newTitle = dialog.input('Enter a name for the bookmark', title, type=xbmcgui.INPUT_ALPHANUM)
+                    except:
+                        newTitle = title
+
+                    if newTitle == '':
+                        newTitle = title
+
+                    service.createBookmark(folderID,newTitle)
+
+
+#create strm files
+elif mode == 'createsearch':
+
+        playbackType = int(addon.getSetting('playback_type'))
+
+        searchText = ''
+        try:
+            searchText = addon.getSetting('criteria')
+        except:
+            searchText = ''
+
+        if searchText == '':
+
+            try:
+                dialog = xbmcgui.Dialog()
+                searchText = dialog.input('Enter search string', type=xbmcgui.INPUT_ALPHANUM)
+            except:
+                xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30100))
+                searchText = 'life'
+
+        if searchText != '':
+
+            instanceName = ''
+            try:
+                instanceName = (plugin_queries['instance']).lower()
+            except:
+                pass
+
+            numberOfAccounts = numberOfAccounts(PLUGIN_NAME)
+
+            # show list of services
+            if numberOfAccounts > 1 and instanceName == '':
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                while True:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username != '':
+                            addMenu(PLUGIN_URL+'?mode=main&instance='+instanceName,username)
+                    except:
+                        break
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+            else:
+                # show index of accounts
+                if instanceName == '' and numberOfAccounts == 1:
+
+                    count = 1
+                    max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                    loop = True
+                    while loop:
+                        instanceName = PLUGIN_NAME+str(count)
+                        try:
+                            username = addon.getSetting(instanceName+'_username')
+                            if username != '':
+
+                                #let's log in
+                                service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                                loop = False
+                        except:
+                            break
+
+                        if count == max_count:
+                            break
+                        count = count + 1
+
+                        # no accounts defined
+                elif numberOfAccounts == 0:
+
+                    #legacy account conversion
+                    try:
+                        username = addon.getSetting('username')
+
+                        if username != '':
+                            addon.setSetting(PLUGIN_NAME+'1_username', username)
+                            addon.setSetting(PLUGIN_NAME+'1_password', addon.getSetting('password'))
+                            addon.setSetting(PLUGIN_NAME+'1_auth_token', addon.getSetting('auth_token'))
+                            addon.setSetting(PLUGIN_NAME+'1_auth_session', addon.getSetting('auth_session'))
+                            addon.setSetting('username', '')
+                            addon.setSetting('password', '')
+                            addon.setSetting('auth_token', '')
+                            addon.setSetting('auth_session', '')
+                        else:
+                            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                            log(addon.getLocalizedString(30015), True)
+                            xbmcplugin.endOfDirectory(plugin_handle)
+                    except :
+                            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30015))
+                            log(addon.getLocalizedString(30015), True)
+                            xbmcplugin.endOfDirectory(plugin_handle)
+
+                    #let's log in
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+
+                # show entries of a single account (such as folder)
+                elif instanceName != '':
+
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+            try:
+                service
+            except NameError:
+                xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
+                log(addon.getLocalizedString(30050)+ 'hive-login', True)
+                xbmcplugin.endOfDirectory(plugin_handle)
+
+            service.createSearch(searchText)
+
+            mediaItems = service.getSearchResults(searchText)
+
+            isSorted = "0"
+            try:
+                isSorted = addon.getSetting('sorted')
+            except:
+                pass
+
+            if mediaItems:
+                if isSorted == "0":
+                    for item in sorted(mediaItems, key=lambda package: package.sortTitle):
+
+                        try:
+                            if item.file == 0:
+                                addDirectory(service, item.folder)
+                            else:
+                                addMediaFile(service, False, playbackType, item)
+                        except:
+                            addMediaFile(service, False, playbackType, item)
+                elif isSorted == "1":
+                    for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
+
+                        try:
+                            if item.file == 0:
+                                addDirectory(service, item.folder)
+                            else:
+                                addMediaFile(service, False, playbackType, item)
+                        except:
+                            addMediaFile(service, False, playbackType, item)
+                else:
+                    for item in mediaItems:
+
+                        try:
+                            if item.file == 0:
+                                addDirectory(service, item.folder)
+                            else:
+                                addMediaFile(service, False, playbackType, item)
+                        except:
+                            addMediaFile(service, False, playbackType, item)
+
+            service.updateAuthorization(addon)
 if mode == 'options' or mode == 'buildstrm' or mode == 'clearauth':
     addMenu(PLUGIN_URL+'?mode=clearauth','<<'+addon.getLocalizedString(30018)+'>>')
     addMenu(PLUGIN_URL+'?mode=buildstrm','<<'+addon.getLocalizedString(30025)+'>>')
+    addMenu(PLUGIN_URL+'?mode=createsearch','<<Save Search>>')
 
 
 

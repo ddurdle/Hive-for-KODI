@@ -1,3 +1,7 @@
+Version 0.2.1
+- cosmetic changes
+- added bookmarks
+- added saved searches
 Version 0.2.0
 - Hive out of beta; updated api calls
 - contribution from JoKeRzBoX - This change to library file hive.py adds capacity to play an audio file that does not have HD image (backdrop) and/or thumbnail. This situation happens when the audio file is not recognized by Hive as any known song from an known album
