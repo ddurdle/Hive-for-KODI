@@ -1,4 +1,7 @@
 - add cloudservice API reference version #s
+- remove isQuickLink (unused)
+- removed playbackType retrieval calls and links to addMediaFile (as a result of isQuickLink removal)
+- refactor: instanstation of service class
 Version 0.2.2
 - JoKeRzBoX contribution: Show friend's logo while browsing list of friends #13
 - JoKeRzBoX contribution: Show Friend's icon/thumbnail while browsing list of friends #12
