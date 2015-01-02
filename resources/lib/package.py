@@ -21,6 +21,7 @@
 #
 #
 class package:
+    # CloudService v0.2.0
 
     ##
     ##

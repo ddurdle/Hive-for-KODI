@@ -22,6 +22,7 @@ import urllib
 #
 #
 class file:
+    # CloudService v0.2.0
 
     AUDIO = 1
     VIDEO = 2

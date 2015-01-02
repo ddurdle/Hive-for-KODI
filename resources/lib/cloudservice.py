@@ -31,6 +31,7 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 #
 #
 class cloudservice(object):
+    # CloudService v0.2.0
 
     def __init__(self): pass
 

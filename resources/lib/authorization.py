@@ -22,6 +22,7 @@
 #
 #
 class authorization:
+    # CloudService v0.2.0
 
     ##
     ##

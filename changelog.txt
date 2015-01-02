@@ -1,3 +1,4 @@
+- add cloudservice API reference version #s
 Version 0.2.2
 - JoKeRzBoX contribution: Show friend's logo while browsing list of friends #13
 - JoKeRzBoX contribution: Show Friend's icon/thumbnail while browsing list of friends #12
