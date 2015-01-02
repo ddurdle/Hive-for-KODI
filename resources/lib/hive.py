@@ -36,7 +36,6 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 addon = xbmcaddon.Addon(id='plugin.video.hive')
 addon_dir = xbmc.translatePath( addon.getAddonInfo('path') )
 
-import os
 import sys
 
 sys.path.append(os.path.join( addon_dir, 'resources', 'lib' ) )
