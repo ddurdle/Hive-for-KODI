@@ -91,7 +91,7 @@ class hive(cloudservice):
             username = ''
         self.authorization = authorization.authorization(username)
 
-
+        # hive specific ***
         self.isPremium = True
         try:
             if int(self.addon.getSetting(self.instanceName+'_type')) == 1:
@@ -113,12 +113,13 @@ class hive(cloudservice):
             self.skipUnwatchable = True
         else:
             self.skipUnwatchable = False
-
+        #***
 
         self.cookiejar = cookielib.CookieJar()
 
         self.user_agent = user_agent
 
+        # hive specific ***
         #token?
         if (not self.authorization.loadToken(self.instanceName,addon, 'token')):
             self.login()
@@ -131,7 +132,6 @@ class hive(cloudservice):
                 self.isLibrary = False
         except:
                 self.isLibrary = False
-
 
         if self.isLibrary:
             self.library = gSpreadsheets.gSpreadsheets(self.addon,self.crashreport,self.user_agent)
@@ -148,7 +148,7 @@ class hive(cloudservice):
 
             #self.buildSpreadsheet('','')
             #self.library.createRow(self.worksheet)
-
+        #***
 
     ##
     # perform login
