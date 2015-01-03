@@ -687,41 +687,6 @@ class hive(cloudservice):
     def getMediaCall(self, package):
         return #not implemented
 
-    ##
-    # retrieve a directory url
-    #   returns: url
-    ##
-    def getDirectoryCall(self, folder):
-        return self.PLUGIN_URL+'?mode=folder&instance='+self.instanceName+'&directory='+folder.id
-
-
-    def buildSTRM(self, path, folderID=''):
-
-        import xbmcvfs
-        xbmcvfs.mkdir(path)
-
-        mediaItems = self.getMediaList(folderID,0)
-
-        if mediaItems:
-            for item in mediaItems:
-
-                url = 0
-                try:
-                    if item.file == 0:
-                        self.buildSTRM(path + '/'+item.folder.title, item.folder.id)
-                    else:
-                        url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
-                except:
-                    url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
-
-
-                if url != 0:
-                    if not os.path.exists(path + item.file.title+'.strm'):
-                        filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
-                        strmFile = open(filename, "w")
-
-                        strmFile.write(url+'\n')
-                        strmFile.close()
 
     def buildSpreadsheet(self, folderID='', folderName=''):
 
