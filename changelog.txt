@@ -1,3 +1,9 @@
+Version 0.2.3
+- JoKeRzBoX contribution: set preferable (max) resolution and other fixes #14
+- JoKeRzBoX contribution: FIX: the "ask" dialogue where addon asks user what resolution to choose is now ordered (from higher to lower resolution)
+- JoKeRzBoX contribution: FIX: in the "ask" dialogue, if user just closes the dialogue without choosing anything, video would still try to play.
+- JoKeRzBoX contribution: ADD: Settings to configure the max quality/resolution for video and audio (separate) for both premium and free users
+- JoKeRzBoX contribution: ADD: When video plays, title also shows the resolution ( @ )
 - add cloudservice API reference version #s
 - remove isQuickLink (unused)
 - removed playbackType retrieval calls and links to addMediaFile (as a result of isQuickLink removal)
