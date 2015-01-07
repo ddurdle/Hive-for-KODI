@@ -783,41 +783,89 @@ elif mode == 'video' or mode == 'audio':
         playbackType = ''
         if service.isPremium:
             try:
-                playbackType = int(addon.getSetting('playback_type'))
+                if mode == 'audio':
+                    playbackType = int(addon.getSetting('playback_type_audio'))
+                else:
+                    playbackType = int(addon.getSetting('playback_type_video'))
             except:
                 playbackType = 0
         else:
             try:
-                playbackType = int(addon.getSetting('free_playback_type'))
+                if mode == 'audio':
+                    playbackType = int(addon.getSetting('free_playback_type_audio'))
+                else:
+                    playbackType = int(addon.getSetting('free_playback_type_video'))
             except:
-                playbackType = 1
-
+                if mode == 'audio':
+                    playbackType = 0
+                else:
+                    playbackType = 1
+                
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
     mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
 
     playbackURL = ''
-    if playbackType == 0:
-        for mediaURL in mediaURLs:
-            if mediaURL.qualityDesc == 'original':
-                playbackURL = mediaURL.url
-    elif playbackType == 1 and not service.isPremium:
-        for mediaURL in mediaURLs:
-            if mediaURL.qualityDesc == '240p':
-                playbackURL = mediaURL.url
 
-    else:
+    # BEGIN JoKeRzBoX
+    # - Get list of possible resolutions (quality), pre-ordered from best to lower res, from a String constant
+    # - Create associative array (a.k.a. hash list) availableQualities with each available resolution (key) and media URL (value)
+    # - Simple algorithm to go through possible resolutions and find the best available one based on user's choice
+    # FIX: list of qualities shown to user are now ordered from highest to low resolution
+    if mode == 'audio':
+        possibleQualities = addon.getLocalizedString(30058)
+    else: 
+        possibleQualities = addon.getLocalizedString(30057)
+    listPossibleQualities = possibleQualities.split("|")
+    availableQualities = {}
+    for mediaURL in mediaURLs:
+        availableQualities[mediaURL.qualityDesc] = mediaURL.url
+
+    ## User has chosen: "Always original quality"
+    #if playbackType == 0:
+    #    playbackURL = availableQualities['original']
+
+    # User has chosen a max quality other than "original". Let's decide on the best stream option available
+    #else:
+    userChosenQuality = listPossibleQualities[playbackType]
+    reachedThreshold = 0
+    for quality in listPossibleQualities:
+        if quality == userChosenQuality:
+            reachedThreshold  = 1
+        if reachedThreshold and quality in availableQualities:
+            playbackURL = availableQualities[quality]
+            chosenRes = str(quality)
+            reachedThreshold = 0
+    if reachedThreshold and playbackType != len(listPossibleQualities)-1 and len(availableQualities) == 3:
+        # Means that the exact encoding requested by user was not found. 
+        # Also, there are the only available: original, 360p and  240p (because cont = 3). 
+        # Therefore if user did not choose "always ask" it is safe to assume "original" is the one closest to the quality selected by user
+        playbackURL = availableQualities['original']
+    
+    # Desired quality still not found. Lets bring list of available options and let user select
+    if  playbackURL == '':
         options = []
-        for mediaURL in mediaURLs:
-            options.append(mediaURL.qualityDesc)
+        for quality in listPossibleQualities:
+            if quality in availableQualities:
+                options.append(quality)
         ret = xbmcgui.Dialog().select(addon.getLocalizedString(30033), options)
-        playbackURL = mediaURLs[ret].url
+        if ret >= 0:
+            playbackURL = availableQualities[str(options[ret])]
+            chosenRes = str(options[ret])
+    
+    # END JoKeRzBoX
 
-    item = xbmcgui.ListItem(path=playbackURL)
-#    item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
-#    item.setInfo( type="Video")
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
-
+    # JoKeRzBox: FIX: when user does not choose from list, addon was still playing a stream
+    if playbackURL != '':
+        item = xbmcgui.ListItem(path=playbackURL)
+#       item.setInfo( type="Video", infoLabels={ "Title": title , "Plot" : title } )
+#       item.setInfo( type="Video")
+        # Add resolution to beginning of title while playing media. Format "<RES> | <TITLE>"
+        if mode == 'audio':
+            item.setInfo( type="music", infoLabels={ "Title": title + " @ " + chosenRes} )
+        else:
+            item.setInfo( type="video", infoLabels={ "Title": title + " @ " + chosenRes, "Plot" : title } )        
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 #play a video given its exact-title
 elif mode == 'requestencoding':

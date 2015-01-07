@@ -12,15 +12,20 @@
         <setting id="cache_folder" type="folder" label="30012" visible="eq(-1,1)" default="special://profile/addon_data/plugin.video.hive/cache"/>
         <setting type="lsep"/>
         <setting id="playback_links" type="bool" label="30013" default="true"/>-->
+    </category>
+    <category label="30009">
         <setting label="30083" type="lsep"/>
-        <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>
+<!--        <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>-->
+        <setting id="playback_type_video" type="enum" label="30055" values="Always original quality|720p|480p|360p|240p|Always ask" default="0"/>
+        <setting id="playback_type_audio" type="enum" label="30056" values="Always original quality|320k|128k|32k|Always ask" default="0"/>
         <setting id="hide_unwatchable" type="bool" label="30085" default="false"/>
         <setting label="30084" type="lsep"/>
-        <setting id="free_playback_type" type="enum" label="30006" values="Always original quality|240p|Always ask" default="1"/>
+        <setting id="free_playback_type_video" type="enum" label="30055" values="Always original quality|240p|Always ask" default="1"/>
+        <setting id="free_playback_type_audio" type="enum" label="30056" values="Always original quality|32k|Always ask" default="0"/>
         <setting id="free_hide_unwatchable" type="bool" label="30085" default="true"/>
 
     </category>
-<!-->    <category label="30060">
+<!--    <category label="30060">
         <setting label="30061" type="lsep"/>
         <setting id="gdrive_library" type="bool" label="30064" default="false" />
         <setting id="gdrive_username" type="text" label="30062" default="" />
@@ -29,16 +34,6 @@
         <setting id="gdrive_save_auth_token" type="bool" label="30005" default="true" />
     </category>
 -->
-    <category label="30074">
-        <setting id="crashreport_enable" type="bool" label="30075" default="false"/>
-        <setting id="crashreport_email" type="text" label="30076" default=""/>
-        <setting id="crashreport_os" type="enum" label="30078" values="Other|Windows|Linux|Raspberry PI|Android|iOS|Mac OS|Apple TV"/>
-        <setting id="crashreport_version"  type="enum" label="30079" values="Other|XBMC 12|XBMC 13|XBMC 13.2|KODI 14|KODI 14 alpha1|KODI alpha2|KODI 14 beta"/>
-        <setting label="30077" type="lsep"/>
-        <setting label="30071" type="lsep"/>
-        <setting label="30072" type="lsep"/>
-        <setting id="crashreport_ident"  type="text" label="30080" />
-    </category>
     <category label="30065">
         <setting label="30066" type="lsep"/>
         <setting id="context_photo" type="enum" subsetting="true" label="30068" values="Photos only|Music and Photos|Everything" default="0"/>
@@ -101,5 +96,15 @@
         <setting id="hive10_password" type="text" label="30002" visible="eq(-38,9)" option="hidden" default="" />
         <setting id="hive10_save_auth_token" type="bool" label="30005" visible="eq(-39,9)" default="true" />
         <setting id="hive10_type" type="enum" label="30082" visible="eq(-40,9)" values="non-premium or free|premium" default="0" />
+    </category>
+    <category label="30074">
+        <setting id="crashreport_enable" type="bool" label="30075" default="false"/>
+        <setting id="crashreport_email" type="text" label="30076" default=""/>
+        <setting id="crashreport_os" type="enum" label="30078" values="Other|Windows|Linux|Raspberry PI|Android|iOS|Mac OS|Apple TV"/>
+        <setting id="crashreport_version"  type="enum" label="30079" values="Other|XBMC 12|XBMC 13|XBMC 13.2|KODI 14|KODI 14 alpha1|KODI alpha2|KODI 14 beta"/>
+        <setting label="30077" type="lsep"/>
+        <setting label="30071" type="lsep"/>
+        <setting label="30072" type="lsep"/>
+        <setting id="crashreport_ident"  type="text" label="30080" />
     </category>
 </settings>

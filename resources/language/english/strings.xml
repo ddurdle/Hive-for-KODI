@@ -51,6 +51,14 @@
     <string id="30052">Ensure that your username and password are set in settings.</string>
     <string id="30053">Only Email login is supported (no Facebook, no Google).</string>
     <string id="30054">List files according to</string>
+	
+	<!-- BEGIN added by JoKeRzBoX -->
+	<string id="30055">Maximum resolution for Video playback</string>
+	<string id="30056">Maximum resolution for Audio playback</string>
+	<string id="30057">original|720p|480p|360p|240p|ask</string>
+	<string id="30058">original|320k|128k|32k|ask</string>
+	<!-- END added by JoKeRzBoX -->
+	
     <string id="30060">Library</string>
     <string id="30061">Library Integration via Google Drive</string>
     <string id="30062">Full Username (i.e. username@gmail.com)</string>
