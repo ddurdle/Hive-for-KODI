@@ -319,9 +319,9 @@ class hive(cloudservice):
                 userLast = re.sub('"', '', userLast)
 
                 if userName != 'null':
-                    media = package.package(0,folder.folder('u='+userID+'f=0',userName, thumbURL))
+                    media = package.package(None,folder.folder('u='+userID+'f=0',userName, thumbURL))
                 else:
-                    media = package.package(0,folder.folder('u='+userID+'f=0',userFirst + ' - '+userLast, thumbURL))
+                    media = package.package(None,folder.folder('u='+userID+'f=0',userFirst + ' - '+userLast, thumbURL))
 
                 mediaFiles.append(media)
 
@@ -365,14 +365,14 @@ class hive(cloudservice):
                     folderID,folderName = q.groups()
                     folderName = urllib.quote(folderName)
                     folderName = '*'+str(folderName)
-                    media = package.package(0,folder.folder(folderID,folderName))
+                    media = package.package(None,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
                     processed = 1
 
                 for q in re.finditer('\"id\"\:\"[^\"]+\".*?\"title\"\:\"(SAVED-SEARCH)\|([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     search,searchCriteria = q.groups()
                     searchCriteria = urllib.quote(searchCriteria)
-                    media = package.package(0,folder.folder('SAVED-SEARCH',searchCriteria))
+                    media = package.package(None,folder.folder('SAVED-SEARCH',searchCriteria))
                     mediaFiles.append(media)
                     processed = 1
 
@@ -380,7 +380,7 @@ class hive(cloudservice):
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                         folderID,folderName = q.groups()
                         folderName = urllib.quote(folderName)
-                        media = package.package(0,folder.folder(folderID,folderName))
+                        media = package.package(None,folder.folder(folderID,folderName))
                         mediaFiles.append(media)
 
                 # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
@@ -549,7 +549,7 @@ class hive(cloudservice):
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     folderID,folderName = q.groups()
                     folderName = urllib.quote(folderName)
-                    media = package.package(0,folder.folder(folderID,folderName))
+                    media = package.package(None,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):

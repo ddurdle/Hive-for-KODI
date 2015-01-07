@@ -112,21 +112,56 @@ class cloudservice(object):
 
                 url = 0
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         self.buildSTRM(path + '/'+item.folder.title, item.folder.id)
                     else:
-                        url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+                        url = self.PLUGIN_URL+'?mode=video&title='+str(item.file.title)+'&filename='+str(item.file.id)
                 except:
-                    url = PLUGIN_URL+'?mode=video&title='+item.file.title+'&filename='+item.file.id
+                    url = self.PLUGIN_URL+'?mode=video&title='+str(item.file.title)+'&filename='+str(item.file.id)
 
 
                 if url != 0:
-                    if not os.path.exists(path + item.file.title+'.strm'):
-                        filename = xbmc.translatePath(os.path.join(path, item.file.title+'.strm'))
+                    title = item.file.title
+                    title = re.sub('%20', ' ', title)
+
+                    if not os.path.exists(path + title+'.strm'):
+                        filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
                         strmFile = open(filename, "w")
 
                         strmFile.write(url+'\n')
                         strmFile.close()
+
+         # MY ADDITION:
+                    if self.addon.getSetting('tvshows_path') != '' or self.addon.getSetting('movies_path') != '':
+                        pathLib = ''
+                        regtv = re.compile('(.+?)'
+                                       '[ .]S(\d\d?)E(\d\d?)'
+                                       '.*?'
+                                       '(?:[ .](\d{3}\d?p)|\Z)?')
+                        regmovie = re.compile('(.*?[ .]\d{4})'
+                                          '.*?'
+                                          '(?:[ .](\d{3}\d?p)|\Z)?')
+                        tv = regtv.match(title)
+                        if tv and self.addon.getSetting('tvshows_path') != '':
+                            show = tv.group(1).replace(".", " ")
+                            season = tv.group(2)
+                            pathLib = self.addon.getSetting('tvshows_path') + '/' + show
+                            if not xbmcvfs.exists(xbmc.translatePath(pathLib)):
+                                xbmcvfs.mkdir(xbmc.translatePath(pathLib))
+                            pathLib = pathLib + '/Season ' + season
+                            if not xbmcvfs.exists(xbmc.translatePath(pathLib)):
+                                xbmcvfs.mkdir(xbmc.translatePath(pathLib))
+                        elif self.addon.getSetting('movies_path') != '':
+                            movie = regmovie.match(title)
+                            if movie:
+                                pathLib = self.addon.getSetting('movies_path')
+
+                        if pathLib != '':
+                            if not os.path.exists(pathLib + title+'.strm'):
+                                filename = xbmc.translatePath(os.path.join(pathLib, title+'.strm'))
+                                strmFile = open(filename, "w")
+                                strmFile.write(url+'\n')
+                                strmFile.close()
 
 
     ##

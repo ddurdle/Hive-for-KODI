@@ -1,3 +1,9 @@
+Version 0.2.4
+- nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders
+- nekwebdev contribution: Integration with thetvdb #5
+- fix: problem creating .STRM for subfolders introduced in 0.2.2
+- fix: replace %20 with blanks in .STRM files
+- add: save STRM path to settings (optional tvshows and movies)
 Version 0.2.3
 - JoKeRzBoX contribution: set preferable (max) resolution and other fixes #14
 - JoKeRzBoX contribution: FIX: the "ask" dialogue where addon asks user what resolution to choose is now ordered (from higher to lower resolution)

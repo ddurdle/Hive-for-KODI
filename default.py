@@ -269,12 +269,14 @@ if mode == 'clearauth':
 elif mode == 'buildstrm':
 
     try:
-        path = addon.getSetting('path')
+        path = addon.getSetting('strm_path')
     except:
         path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
+        addon.setSetting('strm_path', path)
 
     if path == '':
         path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
+        addon.setSetting('strm_path', path)
 
     if path != '':
         returnPrompt = xbmcgui.Dialog().yesno(addon.getLocalizedString(30000), addon.getLocalizedString(30027) + '\n'+path +  '?')
@@ -513,7 +515,7 @@ elif mode == 'createsearch':
                     for item in sorted(mediaItems, key=lambda package: package.sortTitle):
 
                         try:
-                            if item.file == 0:
+                            if item.file is None:
                                 addDirectory(service, item.folder)
                             else:
                                 addMediaFile(service, item)
@@ -523,7 +525,7 @@ elif mode == 'createsearch':
                     for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
 
                         try:
-                            if item.file == 0:
+                            if item.file is None:
                                 addDirectory(service, item.folder)
                             else:
                                 addMediaFile(service, item)
@@ -533,7 +535,7 @@ elif mode == 'createsearch':
                     for item in mediaItems:
 
                         try:
-                            if item.file == 0:
+                            if item.file is None:
                                 addDirectory(service, item.folder)
                             else:
                                 addMediaFile(service, item)
@@ -656,7 +658,7 @@ if mode == 'main' or mode == 'folder':
         if isSorted == "0":
             for item in sorted(mediaItems, key=lambda package: package.sortTitle):
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -666,7 +668,7 @@ if mode == 'main' or mode == 'folder':
             for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
 
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -676,7 +678,7 @@ if mode == 'main' or mode == 'folder':
             for item in mediaItems:
 
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -725,7 +727,7 @@ elif mode == 'search':
             for item in sorted(mediaItems, key=lambda package: package.sortTitle):
 
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -735,7 +737,7 @@ elif mode == 'search':
             for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
 
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -745,7 +747,7 @@ elif mode == 'search':
             for item in mediaItems:
 
                 try:
-                    if item.file == 0:
+                    if item.file is None:
                         addDirectory(service, item.folder)
                     else:
                         addMediaFile(service, item)
@@ -800,7 +802,7 @@ elif mode == 'video' or mode == 'audio':
                     playbackType = 0
                 else:
                     playbackType = 1
-                
+
     mediaFile = file.file(filename, title, '', 0, '','')
     mediaFolder = folder.folder(directory,directory)
     mediaURLs = service.getPlaybackCall(playbackType,package.package(mediaFile,mediaFolder ))
@@ -814,7 +816,7 @@ elif mode == 'video' or mode == 'audio':
     # FIX: list of qualities shown to user are now ordered from highest to low resolution
     if mode == 'audio':
         possibleQualities = addon.getLocalizedString(30058)
-    else: 
+    else:
         possibleQualities = addon.getLocalizedString(30057)
     listPossibleQualities = possibleQualities.split("|")
     availableQualities = {}
@@ -837,11 +839,11 @@ elif mode == 'video' or mode == 'audio':
             chosenRes = str(quality)
             reachedThreshold = 0
     if reachedThreshold and playbackType != len(listPossibleQualities)-1 and len(availableQualities) == 3:
-        # Means that the exact encoding requested by user was not found. 
-        # Also, there are the only available: original, 360p and  240p (because cont = 3). 
+        # Means that the exact encoding requested by user was not found.
+        # Also, there are the only available: original, 360p and  240p (because cont = 3).
         # Therefore if user did not choose "always ask" it is safe to assume "original" is the one closest to the quality selected by user
         playbackURL = availableQualities['original']
-    
+
     # Desired quality still not found. Lets bring list of available options and let user select
     if  playbackURL == '':
         options = []
@@ -852,7 +854,7 @@ elif mode == 'video' or mode == 'audio':
         if ret >= 0:
             playbackURL = availableQualities[str(options[ret])]
             chosenRes = str(options[ret])
-    
+
     # END JoKeRzBoX
 
     # JoKeRzBox: FIX: when user does not choose from list, addon was still playing a stream
@@ -864,7 +866,7 @@ elif mode == 'video' or mode == 'audio':
         if mode == 'audio':
             item.setInfo( type="music", infoLabels={ "Title": title + " @ " + chosenRes} )
         else:
-            item.setInfo( type="video", infoLabels={ "Title": title + " @ " + chosenRes, "Plot" : title } )        
+            item.setInfo( type="video", infoLabels={ "Title": title + " @ " + chosenRes, "Plot" : title } )
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, item)
 
 #play a video given its exact-title
