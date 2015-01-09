@@ -2,6 +2,7 @@ Version 0.2.5
 - fix: playing back when using multiple accounts
 - nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders -- enhancements
 - nekwebdev contribution: Integration with thetvdb #5 -- enhancements
+- fix: With 0.2.4 version in my kodi (RPi) I can not play anything #17
 Version 0.2.4
 - nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders
 - nekwebdev contribution: Integration with thetvdb #5
