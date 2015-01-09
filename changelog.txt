@@ -1,3 +1,4 @@
+- nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders -- enhancements
 Version 0.2.4
 - nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders
 - nekwebdev contribution: Integration with thetvdb #5

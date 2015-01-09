@@ -131,17 +131,37 @@ class cloudservice(object):
                         strmFile.write(url+'\n')
                         strmFile.close()
 
-         # MY ADDITION:
+                    # nekwebdev contribution
                     if self.addon.getSetting('tvshows_path') != '' or self.addon.getSetting('movies_path') != '':
                         pathLib = ''
-                        regtv = re.compile('(.+?)'
+                        regtv1 = re.compile('(.+?)'
                                        '[ .]S(\d\d?)E(\d\d?)'
+                                       '.*?'
+                                       '(?:[ .](\d{3}\d?p)|\Z)?')
+                        regtv2 = re.compile('(.+?)'
+                                       '[ .]s(\d\d?)e(\d\d?)'
+                                       '.*?'
+                                       '(?:[ .](\d{3}\d?p)|\Z)?')
+                        regtv3 = re.compile('(.+?)'
+                                       '[ .](\d\d?)x(\d\d?)'
+                                       '.*?'
+                                       '(?:[ .](\d{3}\d?p)|\Z)?')
+                        regtv4 = re.compile('(.+?)'
+                                       '[ .](\d\d?)X(\d\d?)'
                                        '.*?'
                                        '(?:[ .](\d{3}\d?p)|\Z)?')
                         regmovie = re.compile('(.*?[ .]\d{4})'
                                           '.*?'
                                           '(?:[ .](\d{3}\d?p)|\Z)?')
-                        tv = regtv.match(title)
+
+                        tv = regtv1.match(title)
+                        if not tv:
+                            tv = regtv2.match(title)
+                        if not tv:
+                            tv = regtv3.match(title)
+                        if not tv:
+                            tv = regtv4.match(title)
+
                         if tv and self.addon.getSetting('tvshows_path') != '':
                             show = tv.group(1).replace(".", " ")
                             season = tv.group(2)
