@@ -1,3 +1,5 @@
+Version 0.2.5
+- fix: playing back when using multiple accounts
 - nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders -- enhancements
 - nekwebdev contribution: Integration with thetvdb #5 -- enhancements
 Version 0.2.4

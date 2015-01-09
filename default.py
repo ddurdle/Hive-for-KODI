@@ -83,12 +83,12 @@ def addMediaFile(service, package):
         cleanURL = ''
 
 #    url = PLUGIN_URL+'?mode=streamurl&title='+package.file.title+'&url='+cleanURL
-    url = PLUGIN_URL+playbackURL+'&title='+package.file.title+'&filename='+package.file.id
+    url = PLUGIN_URL+playbackURL+'&instance='+str(service.instanceName)+'&title='+package.file.title+'&filename='+package.file.id
 
     if package.file.isEncoded == False:
-        cm.append(( addon.getLocalizedString(30086), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=requestencoding&title='+package.file.title+'&filename='+package.file.id+')', ))
+        cm.append(( addon.getLocalizedString(30086), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=requestencoding&instance='+str(service.instanceName)+'&title='+package.file.title+'&filename='+package.file.id+')', ))
 
-    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+package.file.title+'&filename='+package.file.id+')', ))
+    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&instance='+str(service.instanceName)+'&title='+package.file.title+'&filename='+package.file.id+')', ))
 #    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
 #    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
 #    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
@@ -111,14 +111,14 @@ def addDirectory(service, folder):
 
     if folder.id != '':
         cm=[]
-        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
-        cm.append(( addon.getLocalizedString(30081), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=createbookmark&title='+folder.title+'&instanceName='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instance='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        cm.append(( addon.getLocalizedString(30081), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=createbookmark&title='+folder.title+'&instance='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
 
         listitem.addContextMenuItems(cm, False)
     listitem.setProperty('fanart_image', fanart)
 
     if folder.id == 'SAVED-SEARCH':
-        xbmcplugin.addDirectoryItem(plugin_handle, PLUGIN_URL+'?mode=search&criteria='+folder.title, listitem,
+        xbmcplugin.addDirectoryItem(plugin_handle, PLUGIN_URL+'?mode=search&instance='+str(service.instanceName)+'&criteria='+folder.title, listitem,
                                 isFolder=True, totalItems=0)
     else:
         xbmcplugin.addDirectoryItem(plugin_handle, service.getDirectoryCall(folder), listitem,
@@ -303,7 +303,7 @@ elif mode == 'buildstrm':
             try:
                 folderID = plugin_queries['folderID']
                 title = plugin_queries['title']
-                instanceName = plugin_queries['instanceName']
+                instanceName = plugin_queries['instance']
             except:
                 folderID = ''
 
@@ -327,7 +327,7 @@ elif mode == 'buildstrm':
 
 
             elif filename != '':
-                            url = PLUGIN_URL+'?mode=video&title='+title+'&filename='+filename
+                            url = PLUGIN_URL+'?mode=video&instance='+str(service.instanceName)+'&title='+title+'&filename='+filename
                             filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
                             strmFile = open(filename, "w")
 
@@ -364,7 +364,7 @@ elif mode == 'createbookmark':
         try:
                 folderID = plugin_queries['folderID']
                 title = plugin_queries['title']
-                instanceName = plugin_queries['instanceName']
+                instanceName = plugin_queries['instance']
         except:
                 folderID = ''
 
