@@ -60,7 +60,7 @@
     </category>
     <category label="30020">
         <setting id="user_agent" type="text" label="30004" default="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36" />
-        <setting id="sorted" type="enum" label="30054" values="alphabetical|reverse alphabetical|Hive default order" default="0"/>
+<!--        <setting id="sorted" type="enum" label="30054" values="alphabetical|reverse alphabetical|Hive default order" default="0"/>-->
 
 <!--        <setting label="30009" type="lsep"/>
         <setting id="playback_type" type="enum" label="30006" values="Always original quality|Transcode|Always ask" default="0"/>-->
