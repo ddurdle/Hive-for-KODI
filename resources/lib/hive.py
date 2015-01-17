@@ -387,8 +387,8 @@ class hive(cloudservice):
                 has_thumb = re.search(',\"thumb\"\:\"',entry)
                 if has_thumb:
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\".*?\"encoded\"\:([^\,]+)\,' ,entry, re.DOTALL):
-                        fileID,fileName,thumbnail,downloadURL,isEncoded = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\",\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"encoded\"\:([^\,]+)\,' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL,year,month,day,isEncoded = q.groups()
 
                         if isEncoded.lower() == 'false' and self.skipUnwatchable == True:
                             break
@@ -397,7 +397,7 @@ class hive(cloudservice):
                         downloadURL = re.sub('\\\\', '', downloadURL)
                         thumbnail = re.sub('\\\\', '', thumbnail)
 
-                        mediaFile = file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail)
+                        mediaFile = file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail, date=str(day)+'.'+str(month)+'.'+str(year))
                         if isEncoded.lower() == 'true':
                             mediaFile.isEncoded = True
 

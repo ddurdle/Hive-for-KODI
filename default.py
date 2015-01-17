@@ -59,7 +59,7 @@ def addMediaFile(service, package):
         listitem.setInfo('Music', infolabels)
         playbackURL = '?mode=audio'
     elif package.file.type == package.file.VIDEO:
-        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot, 'date' : package.file.date })
         listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
     elif package.file.type == package.file.PICTURE:
@@ -68,7 +68,7 @@ def addMediaFile(service, package):
         playbackURL = '?mode=photo'
     else:
         infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
-        llistitem.setInfo('Video', infolabels)
+        listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
 
     listitem.setProperty('IsPlayable', 'true')
@@ -234,6 +234,9 @@ try:
 except:
     pass
 
+xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
+xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
+
 
 #* utilities *
 #clear the authorization token(s) from the identified instanceName or all instances
@@ -268,21 +271,41 @@ if mode == 'clearauth':
 #create strm files
 elif mode == 'buildstrm':
 
+    silent = 0
     try:
-        path = addon.getSetting('strm_path')
+        silent = addon.getSetting('strm_silent')
     except:
-        path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
-        addon.setSetting('strm_path', path)
+        silent = 0
+
+    try:
+        silent = int(plugin_queries['silent'])
+    except:
+        silent = 0
+
+    path = ''
+    try:
+        path = addon.getSetting('path')
+    except:
+        pass
 
     if path == '':
         path = xbmcgui.Dialog().browse(0,addon.getLocalizedString(30026), 'files','',False,False,'')
         addon.setSetting('strm_path', path)
 
     if path != '':
-        returnPrompt = xbmcgui.Dialog().yesno(addon.getLocalizedString(30000), addon.getLocalizedString(30027) + '\n'+path +  '?')
-
+        if silent == 0:
+            returnPrompt = xbmcgui.Dialog().yesno(addon.getLocalizedString(30000), addon.getLocalizedString(30027) + '\n'+path +  '?')
+        else:
+            returnPrompt = True
 
     if path != '' and returnPrompt:
+
+        if silent != 2:
+            try:
+                pDialog = xbmcgui.DialogProgressBG()
+                pDialog.create(addon.getLocalizedString(30000), 'Building STRMs...')
+            except:
+                pass
 
         try:
             url = plugin_queries['streamurl']
@@ -353,8 +376,13 @@ elif mode == 'buildstrm':
                         break
                     count = count + 1
 
-
-        xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30028))
+        if silent != 2:
+            try:
+                pDialog.update(100)
+            except:
+                pass
+        if silent == 0:
+            xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30028))
     xbmcplugin.endOfDirectory(plugin_handle)
 
 
@@ -504,34 +532,7 @@ elif mode == 'createsearch':
 
             mediaItems = service.getSearchResults(searchText)
 
-            isSorted = "0"
-            try:
-                isSorted = addon.getSetting('sorted')
-            except:
-                pass
-
             if mediaItems:
-                if isSorted == "0":
-                    for item in sorted(mediaItems, key=lambda package: package.sortTitle):
-
-                        try:
-                            if item.file is None:
-                                addDirectory(service, item.folder)
-                            else:
-                                addMediaFile(service, item)
-                        except:
-                            addMediaFile(service, item)
-                elif isSorted == "1":
-                    for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
-
-                        try:
-                            if item.file is None:
-                                addDirectory(service, item.folder)
-                            else:
-                                addMediaFile(service, item)
-                        except:
-                            addMediaFile(service, item)
-                else:
                     for item in mediaItems:
 
                         try:
@@ -648,33 +649,7 @@ if mode == 'main' or mode == 'folder':
 
     mediaItems = service.getMediaList(folderName,0)
 
-    isSorted = "0"
-    try:
-        isSorted = addon.getSetting('sorted')
-    except:
-         pass
-
     if mediaItems:
-        if isSorted == "0":
-            for item in sorted(mediaItems, key=lambda package: package.sortTitle):
-                try:
-                    if item.file is None:
-                        addDirectory(service, item.folder)
-                    else:
-                        addMediaFile(service, item)
-                except:
-                    addMediaFile(service, item)
-        elif isSorted == "1":
-            for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
-
-                try:
-                    if item.file is None:
-                        addDirectory(service, item.folder)
-                    else:
-                        addMediaFile(service, item)
-                except:
-                    addMediaFile(service, item)
-        else:
             for item in mediaItems:
 
                 try:
@@ -716,34 +691,7 @@ elif mode == 'search':
     mediaItems = service.getSearchResults(searchText)
 
 
-    isSorted = "0"
-    try:
-        isSorted = addon.getSetting('sorted')
-    except:
-        pass
-
     if mediaItems:
-        if isSorted == "0":
-            for item in sorted(mediaItems, key=lambda package: package.sortTitle):
-
-                try:
-                    if item.file is None:
-                        addDirectory(service, item.folder)
-                    else:
-                        addMediaFile(service, item)
-                except:
-                        addMediaFile(service, item)
-        elif isSorted == "1":
-            for item in sorted(mediaItems, key=lambda package: package.sortTitle, reverse=True):
-
-                try:
-                    if item.file is None:
-                        addDirectory(service, item.folder)
-                    else:
-                        addMediaFile(service, item)
-                except:
-                    addMediaFile(service, item)
-        else:
             for item in mediaItems:
 
                 try:
@@ -755,7 +703,9 @@ elif mode == 'search':
                     addMediaFile(service, item)
 
     service.updateAuthorization(addon)
-
+#    xbmcplugin.setContent(int(sys.argv[1]), 'videos')
+#    xbmcplugin.setProperty(int(sys.argv[1]),'IsPlayable', 'false')
+#    xbmc.executebuiltin("ActivateWindow(Videos)")
 
 #play a video given its exact-title
 elif mode == 'video' or mode == 'audio':

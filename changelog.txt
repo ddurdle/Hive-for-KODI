@@ -1,3 +1,8 @@
+- add: sort by label support
+- add: sort by date support
+- add: capture media creation date
+- remove: settings sort option (replaced by XBMC sort)
+- add: background indicator for STRM creation
 Version 0.2.5
 - fix: playing back when using multiple accounts
 - nekwebdev contribution: saving movies and tv shows to "easily" XBMC importable folders -- enhancements
