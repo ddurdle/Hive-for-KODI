@@ -53,17 +53,17 @@ def addMediaFile(service, package):
 
     if package.file.type == package.file.AUDIO:
         if package.file.hasMeta:
-            infolabels = decode_dict({ 'title' : package.file.displayTitle(), 'tracknumber' : package.file.trackNumber, 'artist': package.file.artist, 'album': package.file.album,'genre': package.file.genre,'premiered': package.file.releaseDate })
+            infolabels = decode_dict({ 'title' : package.file.displayTitle(), 'tracknumber' : package.file.trackNumber, 'artist': package.file.artist, 'album': package.file.album,'genre': package.file.genre,'premiered': package.file.releaseDate, 'date' : package.file.date, 'size' : package.file.size})
         else:
-            infolabels = decode_dict({ 'title' : package.file.displayTitle() })
+            infolabels = decode_dict({ 'title' : package.file.displayTitle(), 'date' : package.file.date, 'size' : package.file.size })
         listitem.setInfo('Music', infolabels)
         playbackURL = '?mode=audio'
     elif package.file.type == package.file.VIDEO:
-        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot, 'date' : package.file.date })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot, 'date' : package.file.date, 'size' : package.file.size })
         listitem.setInfo('Video', infolabels)
         playbackURL = '?mode=video'
     elif package.file.type == package.file.PICTURE:
-        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot })
+        infolabels = decode_dict({ 'title' : package.file.displayTitle() , 'plot' : package.file.plot, 'date' : package.file.date, 'size' : package.file.size })
         listitem.setInfo('Pictures', infolabels)
         playbackURL = '?mode=photo'
     else:
@@ -236,6 +236,7 @@ except:
 
 xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
 xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
+xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_SIZE)
 
 
 #* utilities *
@@ -273,18 +274,23 @@ elif mode == 'buildstrm':
 
     silent = 0
     try:
-        silent = addon.getSetting('strm_silent')
+        silent = int(addon.getSetting('strm_silent'))
     except:
         silent = 0
 
     try:
         silent = int(plugin_queries['silent'])
     except:
-        silent = 0
+        pass
 
     path = ''
     try:
-        path = addon.getSetting('path')
+        path = int(plugin_queries['path'])
+    except:
+        pass
+
+    try:
+        path = str(addon.getSetting('strm_path'))
     except:
         pass
 
@@ -324,9 +330,9 @@ elif mode == 'buildstrm':
         else:
 
             try:
+                instanceName = plugin_queries['instance']
                 folderID = plugin_queries['folderID']
                 title = plugin_queries['title']
-                instanceName = plugin_queries['instance']
             except:
                 folderID = ''
 

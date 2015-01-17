@@ -267,23 +267,34 @@ class hive(cloudservice):
 
         request = urllib2.Request(url)
 
-        # if action fails, validate login
 
-        try:
+        offset=0
+        loop = True
+        mediaFiles = []
+        limit = 900
+        while loop:
+          loop = False
+          itemCount=0
+          # if action fails, validate login
+          try:
 
             if folderName=='':
                 response = opener.open(request)
+                loop = False
             elif userID != '':
                 response = opener.open(request, 'userId='+userID)
+                loop = False
             elif folderName=='FEED':
                 response = opener.open(request, 'offset=0&limit=100')
+                loop = False
             elif folderName=='FRIENDS':
                 response = opener.open(request, 'offset=0&limit=300')
+                loop = False
             else:
-                response = opener.open(request, 'parentId='+folderName+'&offset=0&limit=300&order=dateModified&sort=desc')
+                response = opener.open(request, 'parentId='+folderName+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
 
-        #maybe authorization key expired?
-        except urllib2.URLError, e:
+          #maybe authorization key expired?
+          except urllib2.URLError, e:
                 self.login()
 
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
@@ -291,26 +302,27 @@ class hive(cloudservice):
                 try:
                     if folderName=='':
                         response = opener.open(request)
+                        loop = False
                     elif userID != '':
                         response = opener.open(request, 'userId='+userID)
+                        loop = False
                     elif folderName=='FEED':
                         response = opener.open(request, 'offset=0&limit=100')
+                        loop = False
                     elif folderName=='FRIENDS':
                         response = opener.open(request, 'offset=0&limit=300')
+                        loop = False
                     else:
-                        response = opener.open(request, 'parentId='+folderName+'&offset=0&limit=300&order=dateModified&sort=desc')
+                        response = opener.open(request, 'parentId='+folderName+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
                 except urllib2.URLError, e:
                     xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
                     self.crashreport.sendError('getMediaList',str(e))
                     return
 
-        response_data = response.read()
-        response.close()
+          response_data = response.read()
+          response.close()
 
-        mediaFiles = []
-
-
-        if folderName == 'FRIENDS':
+          if folderName == 'FRIENDS':
             for r in re.finditer('\"thumbnail\"\:\"([^\"]+)\".*?\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
                 thumb,userID,userName,userFirst,userLast = r.groups()
                 thumbURL = re.sub('"', '', re.sub('\\\/', '/', thumb))
@@ -326,7 +338,7 @@ class hive(cloudservice):
                 mediaFiles.append(media)
 
             return mediaFiles
-        elif folderName == 'FEED':
+          elif folderName == 'FEED':
             for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
@@ -345,10 +357,10 @@ class hive(cloudservice):
                     mediaFiles.append(media)
             return mediaFiles
 
-        # parsing page for files
+          # parsing page for files
 #        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
-        fanart = ''
-        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+          fanart = ''
+          for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
                 #fanart
@@ -357,7 +369,7 @@ class hive(cloudservice):
                     fanart = re.sub('\\\\', '', fanart)
 
 
-        for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
+          for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
                 processed = 0
@@ -368,6 +380,7 @@ class hive(cloudservice):
                     media = package.package(None,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
                     processed = 1
+                    itemCount = itemCount + 1
 
                 for q in re.finditer('\"id\"\:\"[^\"]+\".*?\"title\"\:\"(SAVED-SEARCH)\|([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     search,searchCriteria = q.groups()
@@ -375,6 +388,7 @@ class hive(cloudservice):
                     media = package.package(None,folder.folder('SAVED-SEARCH',searchCriteria))
                     mediaFiles.append(media)
                     processed = 1
+                    itemCount = itemCount + 1
 
                 if processed == 0:
                     for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
@@ -382,13 +396,14 @@ class hive(cloudservice):
                         folderName = urllib.quote(folderName)
                         media = package.package(None,folder.folder(folderID,folderName))
                         mediaFiles.append(media)
+                        itemCount = itemCount + 1
 
                 # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
                 has_thumb = re.search(',\"thumb\"\:\"',entry)
                 if has_thumb:
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\",\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"encoded\"\:([^\,]+)\,' ,entry, re.DOTALL):
-                        fileID,fileName,thumbnail,downloadURL,year,month,day,isEncoded = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"encoded\"\:([^\,]+)\,.*?\"size\"\:\"(\d+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL,year,month,day,isEncoded,filesize = q.groups()
 
                         if isEncoded.lower() == 'false' and self.skipUnwatchable == True:
                             break
@@ -397,34 +412,36 @@ class hive(cloudservice):
                         downloadURL = re.sub('\\\\', '', downloadURL)
                         thumbnail = re.sub('\\\\', '', thumbnail)
 
-                        mediaFile = file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail, date=str(day)+'.'+str(month)+'.'+str(year))
+                        mediaFile = file.file(fileID, fileName, fileName, self.VIDEO, fanart, thumbnail, date=str(day)+'.'+str(month)+'.'+str(year), size=filesize)
                         if isEncoded.lower() == 'true':
                             mediaFile.isEncoded = True
 
                         media = package.package(mediaFile,folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
+                        itemCount = itemCount + 1
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                        fileID,fileName,thumbnail,downloadURL = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"photo\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"\,.*?\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"size\"\:\"(\d+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,thumbnail,downloadURL,year,month,day,filesize = q.groups()
                         fileName = urllib.quote(fileName)
                         downloadURL = re.sub('\\\\', '', downloadURL)
                         thumbnail = re.sub('\\\\', '', thumbnail)
 
-                        media = package.package(file.file(fileID, fileName, fileName, self.PICTURE, fanart, thumbnail),folder.folder('',''))
+                        media = package.package(file.file(fileID, fileName, fileName, self.PICTURE, fanart, thumbnail, date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
+                        itemCount = itemCount + 1
 
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                        fileID,fileName,hdImage,thumbnail,downloadURL = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"hd\"\:\"([^\"]+)\"\,\"thumb\"\:\"([^\"]+)\".*?\"download\"\:\"([^\"]+)\"\,.*?\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"size\"\:\"(\d+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,hdImage,thumbnail,downloadURL,year,month,day,filesize = q.groups()
 
                         fileName = urllib.quote(fileName)
                         downloadURL = re.sub('\\\\', '', downloadURL)
                         thumbnail = re.sub('\\\\', '', thumbnail)
                         hdImage = re.sub('\\\\', '', hdImage)
 
-                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, hdImage, thumbnail)
+                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, hdImage, thumbnail, date=str(day)+'.'+str(month)+'.'+str(year), size=filesize)
 
                         for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
                             artist,album,releaseDate,trackNumber,genre = s.groups()
@@ -433,15 +450,15 @@ class hive(cloudservice):
                         media = package.package(musicFile,folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
-
+                        itemCount = itemCount + 1
                 else:
 
-                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"' ,entry, re.DOTALL):
-                        fileID,fileName,downloadURL = q.groups()
+                    for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"download\"\:\"([^\"]+)\"\,.*?\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d).*?\"size\"\:\"(\d+)\"' ,entry, re.DOTALL):
+                        fileID,fileName,downloadURL,year,month,day,filesize = q.groups()
                         fileName = urllib.quote(fileName)
                         downloadURL = re.sub('\\\\', '', downloadURL)
 
-                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, '', '')
+                        musicFile = file.file(fileID, fileName, fileName, self.AUDIO, '', '',date=str(day)+'.'+str(month)+'.'+str(year), size=filesize)
 
                         for s in re.finditer('\"meta\"\:\{\"artist\"\:"([^\"]+)\"\,\"title\"\:\"[^\"]+\"\,\"album\"\:\"([^\"]+)\"\,\"releaseDate\"\:\"([^\"]+)\"\,\"trackNo\"\:(\d+)\,\"totalTracks\"\:\d+\,\"genre\"\:\"([^\"]+)\"\}' ,entry, re.DOTALL):
                             artist,album,releaseDate,trackNumber,genre = s.groups()
@@ -450,7 +467,10 @@ class hive(cloudservice):
                         media = package.package(musicFile,folder.folder('',''))
                         media.setMediaURL(mediaurl.mediaurl(downloadURL, '','',''))
                         mediaFiles.append(media)
-
+                        itemCount = itemCount + 1
+          offset = offset + limit
+          if itemCount == 0:
+            loop = False
         return mediaFiles
 
 

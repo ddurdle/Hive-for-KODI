@@ -1,6 +1,14 @@
+Version 0.2.6
 - add: sort by label support
 - add: sort by date support
+- add: sort by size support
 - add: capture media creation date
+- add: capture media size
+- add: additional API options for building strm from STRM
+-  plugin.video.hive/?mode=buildstrm&instance=hive1&folderID=#####&title=MyFolder&path=/path/on/disk&silent=0
+-  silent = 0 -> show all prompts and background dialogs
+-  silent = 1 -> show no prompts, just background dialogs
+-  silent = 2 -> show no prompts and no background dialogs
 - remove: settings sort option (replaced by XBMC sort)
 - add: background indicator for STRM creation
 Version 0.2.5

@@ -85,6 +85,7 @@
     </category>
     <category label="30060">
         <setting label="30061" type="lsep"/>
+        <setting id="strm_silent" type="enum" label="30069"  values="None|Silence Prompts|Silence All" default="0" />
         <setting id="strm_path" type="folder" label="30026" default="" />
         <setting id="tvshows_path" type="folder" subsetting="true" label="30089" default="" />
         <setting id="movies_path" type="folder" subsetting="true" label="30088" default="" />
