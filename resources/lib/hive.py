@@ -271,7 +271,7 @@ class hive(cloudservice):
         offset=0
         loop = True
         mediaFiles = []
-        limit = 800
+        limit = 300
         while loop:
           loop = False
           itemCount=0
@@ -342,18 +342,18 @@ class hive(cloudservice):
             for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
-                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"video\"' ,entry, re.DOTALL):
-                    fileID,thumbnail,fileName = q.groups()
+                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"video\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,thumbnail,fileName,year,month,day = q.groups()
                     thumbnail = re.sub('\\\\', '', thumbnail)
                     fileName = urllib.quote(fileName)
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumbnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumbnail, date=str(day)+'.'+str(month)+'.'+str(year)),folder.folder('',''))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"album\"' ,entry, re.DOTALL):
-                    fileID,thumbnail,fileName = q.groups()
+                for q in re.finditer('\"hiveId\"\:\"([^\"]+)\".*?\"thumb\"\:\"([^\"]+)\".*\"title\"\:\"([^\"]+)\".*\"type\"\:\"album\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,thumbnail,fileName,year,month,day = q.groups()
                     thumbnail = re.sub('\\\\', '', thumbnail)
                     fileName = urllib.quote(fileName)
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumbnail),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumbnail, date=str(day)+'.'+str(month)+'.'+str(year)),folder.folder('',''))
                     mediaFiles.append(media)
             return mediaFiles
 
@@ -469,8 +469,8 @@ class hive(cloudservice):
                         mediaFiles.append(media)
                         itemCount = itemCount + 1
           offset = offset + limit
-          if itemCount == 0:
-            loop = False
+          if itemCount == limit:
+            loop = True
         return mediaFiles
 
 
@@ -572,16 +572,16 @@ class hive(cloudservice):
                     media = package.package(None,folder.folder(folderID,folderName))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
-                    fileID,fileName = q.groups()
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"size\"\:\"(\d+)\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,fileName,filesize,year,month,day = q.groups()
                     fileName = urllib.quote(fileName)
-                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', ''),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', '', date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
                     mediaFiles.append(media)
 
-                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?' ,entry, re.DOTALL):
-                    fileID,fileName = q.groups()
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"size\"\:\"(\d+)\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,fileName,filesize,year,month,day = q.groups()
                     fileName = urllib.quote(fileName)
-                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', ''),folder.folder('',''))
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', '', date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
                     mediaFiles.append(media)
 
         return mediaFiles

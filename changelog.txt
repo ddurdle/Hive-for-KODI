@@ -1,3 +1,7 @@
+Version 0.2.7
+- pagination fix on folders > 300
+- add: size + date for search results
+- add: date for feed
 Version 0.2.6
 - add: sort by label support
 - add: sort by date support
