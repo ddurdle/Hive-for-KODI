@@ -271,7 +271,7 @@ class hive(cloudservice):
         offset=0
         loop = True
         mediaFiles = []
-        limit = 900
+        limit = 800
         while loop:
           loop = False
           itemCount=0
