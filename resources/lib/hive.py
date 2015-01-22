@@ -272,26 +272,27 @@ class hive(cloudservice):
         loop = True
         mediaFiles = []
         limit = 300
+        parentID = folderName
         while loop:
           loop = False
           itemCount=0
           # if action fails, validate login
           try:
 
-            if folderName=='':
+            if parentID=='':
                 response = opener.open(request)
                 loop = False
             elif userID != '':
                 response = opener.open(request, 'userId='+userID)
                 loop = False
-            elif folderName=='FEED':
+            elif parentID=='FEED':
                 response = opener.open(request, 'offset=0&limit=100')
                 loop = False
-            elif folderName=='FRIENDS':
+            elif parentID=='FRIENDS':
                 response = opener.open(request, 'offset=0&limit=300')
                 loop = False
             else:
-                response = opener.open(request, 'parentId='+folderName+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
+                response = opener.open(request, 'parentId='+parentID+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
 
           #maybe authorization key expired?
           except urllib2.URLError, e:
@@ -300,20 +301,20 @@ class hive(cloudservice):
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
                 try:
-                    if folderName=='':
+                    if parentID=='':
                         response = opener.open(request)
                         loop = False
                     elif userID != '':
                         response = opener.open(request, 'userId='+userID)
                         loop = False
-                    elif folderName=='FEED':
+                    elif parentID=='FEED':
                         response = opener.open(request, 'offset=0&limit=100')
                         loop = False
-                    elif folderName=='FRIENDS':
+                    elif parentID=='FRIENDS':
                         response = opener.open(request, 'offset=0&limit=300')
                         loop = False
                     else:
-                        response = opener.open(request, 'parentId='+folderName+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
+                        response = opener.open(request, 'parentId='+parentID+'&offset='+str(offset)+'&limit='+str(limit)+'&order=dateModified&sort=desc')
                 except urllib2.URLError, e:
                     xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
                     self.crashreport.sendError('getMediaList',str(e))
@@ -322,7 +323,7 @@ class hive(cloudservice):
           response_data = response.read()
           response.close()
 
-          if folderName == 'FRIENDS':
+          if parentID == 'FRIENDS':
             for r in re.finditer('\"thumbnail\"\:\"([^\"]+)\".*?\"userId\"\:\"([^\"]+)\"\,\"authName\"\:([^\,]+)\,\"authLastName\"\:([^\,]+)\,\"authFirstName\"\:([^\,]+)\,' ,response_data, re.DOTALL):
                 thumb,userID,userName,userFirst,userLast = r.groups()
                 thumbURL = re.sub('"', '', re.sub('\\\/', '/', thumb))
@@ -338,7 +339,7 @@ class hive(cloudservice):
                 mediaFiles.append(media)
 
             return mediaFiles
-          elif folderName == 'FEED':
+          elif parentID == 'FEED':
             for r in re.finditer('\{\"id\"\:.*?\d\"\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
