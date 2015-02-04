@@ -501,14 +501,14 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api.hive.im/api/user/get/'
+        url = 'https://api.hive.im/api/search/hive/ '
 
         request = urllib2.Request(url)
 
         # if action fails, validate login
 
         try:
-                response = opener.open(request)
+                response = opener.open(request,  'limit=50&term='+searchText)
 
         except urllib2.URLError, e:
                 self.login()
@@ -525,40 +525,6 @@ class hive(cloudservice):
         response_data = response.read()
         response.close()
 
-        userID = ''
-        searchAPIKey = ''
-        for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
-                userID,searchAPIKey = r.groups()
-
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
-        opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
-
-        url = 'https://w59tafxi29-1.algolia.io/1/indexes/HiveBeta/query'
-
-        request = urllib2.Request(url)
-
-        # if action fails, validate login
-
-        try:
-                response = opener.open(request, '{"params":"query='+searchText+'","apiKey":"'+searchAPIKey+'","appID":"W59TAFXI29","X-Algolia-TagFilters":"('+userID+')"}')
-
-        except urllib2.URLError, e:
-                self.login()
-
-                opener.addheaders = [('User-Agent', self.user_agent),('X-Algolia-Application-Id', 'W59TAFXI29'),('X-Algolia-API-Key', searchAPIKey), ('Content-type', 'application/json')]
-                request = urllib2.Request(url)
-                try:
-                    response = opener.open(request, '{"params":"query='+searchText+'","apiKey":"'+searchAPIKey+'","appID":"W59TAFXI29","X-Algolia-TagFilters":"('+userID+')"}')
-                except urllib2.URLError, e:
-                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                    self.crashreport.sendError('getSearchResults',str(e))
-                    return
-
-        response_data = response.read()
-        response.close()
-
-        for r in re.finditer('\"userId\"\:\"(\d+)\".*?\"searchApiKey\"\:\"([^\"]+)\"' ,response_data, re.DOTALL):
-                userID,searchAPIKey = r.groups()
 
         mediaFiles = []
 
