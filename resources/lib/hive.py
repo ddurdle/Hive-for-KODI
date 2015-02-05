@@ -530,7 +530,7 @@ class hive(cloudservice):
 
         # parsing page for files
 #        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
-        for r in re.finditer('\"id\"\:.*?\d\"\]' ,response_data, re.DOTALL):
+        for r in re.finditer('\{\"id\"\:.*?\d\}' ,response_data, re.DOTALL):
                 entry = r.group()
 
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
