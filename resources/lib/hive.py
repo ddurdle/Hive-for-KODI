@@ -531,8 +531,34 @@ class hive(cloudservice):
         # parsing page for files
 #        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
         for r in re.finditer('\{\"id\"\:.*?\d\}' ,response_data, re.DOTALL):
-                entry = r.group()
+            entry = r.group()
 
+            # to separate media that has thumbnails from the ones that do not (e.g. unknown audio file)
+            has_thumb = re.search(',\"thumb\"\:\"',entry)
+            if has_thumb:
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
+                    folderID,folderName = q.groups()
+                    folderName = urllib.quote(folderName)
+                    media = package.package(None,folder.folder(folderID,folderName))
+                    mediaFiles.append(media)
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"video\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"size\"\:\"(\d+)\".*?\"thumb\"\:\"([^\"]+)\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,fileName,filesize,thumbnail,year,month,day = q.groups()
+
+                    thumbnail = re.sub('\\\\', '', thumbnail)
+                    fileName = urllib.quote(fileName)
+                    media = package.package(file.file(fileID, fileName, fileName, self.VIDEO, '', thumbnail, date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
+                    mediaFiles.append(media)
+
+                for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"type\"\:\"album\"\,\"title\"\:\"([^\"]+)\"\,\"folder\"\:false.*?\"size\"\:\"(\d+)\".*?\"thumb\"\:\"([^\"]+)\".*?\,\"dateCreated\"\:\"(\d\d\d\d)\-(\d\d)\-(\d\d)' ,entry, re.DOTALL):
+                    fileID,fileName,filesize,thumbnail,year,month,day = q.groups()
+
+                    thumbnail = re.sub('\\\\', '', thumbnail)
+                    fileName = urllib.quote(fileName)
+                    media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', thumbnail, date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
+                    mediaFiles.append(media)
+            else:
                 for q in re.finditer('\"id\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,\"folder\"\:true' ,entry, re.DOTALL):
                     folderID,folderName = q.groups()
                     folderName = urllib.quote(folderName)
@@ -550,6 +576,7 @@ class hive(cloudservice):
                     fileName = urllib.quote(fileName)
                     media = package.package(file.file(fileID, fileName, fileName, self.AUDIO, '', '', date=str(day)+'.'+str(month)+'.'+str(year), size=filesize),folder.folder('',''))
                     mediaFiles.append(media)
+
 
         return mediaFiles
 
