@@ -25,6 +25,7 @@ import sys
 import urllib
 import cgi
 import re
+import xbmcvfs
 
 # global variables
 PLUGIN_NAME = 'hive'
@@ -322,8 +323,11 @@ elif mode == 'buildstrm':
 
         if url != '':
 
-                filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
-                strmFile = open(filename, "w")
+#                filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
+#                strmFile = open(filename, "w")
+                filename = path + '/' + title+'.strm'
+                strmFile = xbmcvfs.File(filename, "w")
+
 
                 strmFile.write(url+'\n')
                 strmFile.close()
@@ -356,9 +360,10 @@ elif mode == 'buildstrm':
 
 
             elif filename != '':
-                            url = PLUGIN_URL+'?mode=video&instance='+str(service.instanceName)+'&title='+title+'&filename='+filename
-                            filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
-                            strmFile = open(filename, "w")
+                            url = PLUGIN_URL+'?mode=video&instance='+instanceName+'&title='+title+'&filename='+filename
+#                            filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
+                            filename = path + '/' + title+'.strm'
+                            strmFile = xbmcvfs.File(filename, "w")
 
                             strmFile.write(url+'\n')
                             strmFile.close()
