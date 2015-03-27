@@ -360,7 +360,7 @@ elif mode == 'buildstrm':
 
 
             elif filename != '':
-                            url = PLUGIN_URL+'?mode=video&instance='+instanceName+'&title='+title+'&filename='+filename
+                            url = PLUGIN_URL+'?mode=video&title='+title+'&filename='+filename + '&username='+username
 #                            filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
                             filename = path + '/' + title+'.strm'
                             strmFile = xbmcvfs.File(filename, "w")
@@ -559,9 +559,16 @@ elif mode == 'createsearch':
 
 numberOfAccounts = numberOfAccounts(PLUGIN_NAME)
 
+try:
+    invokedUsername = plugin_queries['username']
+except:
+    invokedUsername = ''
+
+
 # show list of services
-if numberOfAccounts > 1 and instanceName == '':
-    mode = ''
+if numberOfAccounts > 1 and instanceName == '' and invokedUsername == '':
+    if mode == 'main':
+        mode = ''
     count = 1
     max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
     while True:
@@ -570,6 +577,10 @@ if numberOfAccounts > 1 and instanceName == '':
             username = addon.getSetting(instanceName+'_username')
             if username != '':
                 addMenu(PLUGIN_URL+'?mode=main&instance='+instanceName,username)
+                try:
+                    service
+                except:
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
         except:
             break
         if count == max_count:
@@ -578,7 +589,7 @@ if numberOfAccounts > 1 and instanceName == '':
 
 else:
     # show index of accounts
-    if instanceName == '' and numberOfAccounts == 1:
+    if instanceName == '' and invokedUsername == '' and numberOfAccounts == 1:
 
         count = 1
         max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
@@ -632,6 +643,28 @@ else:
     elif instanceName != '':
 
         service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+
+    elif invokedUsername != '':
+
+        count = 1
+        max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+        loop = True
+        while loop:
+            instanceName = PLUGIN_NAME+str(count)
+            try:
+                username = addon.getSetting(instanceName+'_username')
+                if username == invokedUsername:
+
+                    #let's log in
+                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                    loop = False
+            except:
+                break
+
+            if count == max_count:
+                break
+            count = count + 1
+
 
 if mode == 'main':
     addMenu(PLUGIN_URL+'?mode=options','<< '+addon.getLocalizedString(30043)+' >>')
