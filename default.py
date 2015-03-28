@@ -89,7 +89,7 @@ def addMediaFile(service, package):
     if package.file.isEncoded == False:
         cm.append(( addon.getLocalizedString(30086), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=requestencoding&instance='+str(service.instanceName)+'&title='+package.file.title+'&filename='+package.file.id+')', ))
 
-    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&instance='+str(service.instanceName)+'&title='+package.file.title+'&filename='+package.file.id+')', ))
+    cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&username='+str(service.authorization.username)+'&title='+package.file.title+'&filename='+package.file.id+')', ))
 #    cm.append(( addon.getLocalizedString(30046), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=0)', ))
 #    cm.append(( addon.getLocalizedString(30047), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=1)', ))
 #    cm.append(( addon.getLocalizedString(30048), 'XBMC.PlayMedia('+playbackURL+'&title='+ package.file.title + '&directory='+ package.folder.id + '&filename='+ package.file.id +'&playback=2)', ))
@@ -112,7 +112,7 @@ def addDirectory(service, folder):
 
     if folder.id != '':
         cm=[]
-        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&instance='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
+        cm.append(( addon.getLocalizedString(30042), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=buildstrm&title='+folder.title+'&username='+str(service.authorization.username)+'&folderID='+str(folder.id)+')', ))
         cm.append(( addon.getLocalizedString(30081), 'XBMC.RunPlugin('+PLUGIN_URL+'?mode=createbookmark&title='+folder.title+'&instance='+str(service.instanceName)+'&folderID='+str(folder.id)+')', ))
 
         listitem.addContextMenuItems(cm, False)
@@ -334,7 +334,6 @@ elif mode == 'buildstrm':
         else:
 
             try:
-                instanceName = plugin_queries['instance']
                 folderID = plugin_queries['folderID']
                 title = plugin_queries['title']
             except:
@@ -347,20 +346,38 @@ elif mode == 'buildstrm':
                 filename = ''
 
 
+            try:
+                    invokedUsername = plugin_queries['username']
+            except:
+                    invokedUsername = ''
+
             if folderID != '':
 
-                try:
-                    username = addon.getSetting(instanceName+'_username')
-                except:
-                    username = ''
+                count = 1
+                max_count = int(addon.getSetting(PLUGIN_NAME+'_numaccounts'))
+                loop = True
+                while loop:
+                    instanceName = PLUGIN_NAME+str(count)
+                    try:
+                        username = addon.getSetting(instanceName+'_username')
+                        if username == invokedUsername:
 
-                if username != '':
-                    service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
-                    service.buildSTRM(path + '/'+title,folderID)
+                            #let's log in
+                            service = hive.hive(PLUGIN_URL,addon,instanceName, user_agent)
+                            loop = False
+                    except:
+                        break
+
+                    if count == max_count:
+                        break
+                    count = count + 1
+
+                service.buildSTRM(path + '/'+title,folderID)
+
 
 
             elif filename != '':
-                            url = PLUGIN_URL+'?mode=video&title='+title+'&filename='+filename + '&username='+username
+                            url = PLUGIN_URL+'?mode=video&title='+title+'&filename='+filename + '&username='+invokedUsername
 #                            filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
                             filename = path + '/' + title+'.strm'
                             strmFile = xbmcvfs.File(filename, "w")
