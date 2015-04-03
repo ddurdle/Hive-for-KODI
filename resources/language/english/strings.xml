@@ -95,6 +95,10 @@
     <string id="30088">Location to store movie STRMs (optional) </string>
     <string id="30089">Location to store tv show STRMs (optional) </string>
 
+    <string id="30090">Login Type</string>
+    <string id="30091">Friends</string>
+    <string id="30092">Media Stream</string>
+
 
     <string id="30100">This feature is not supported on your version of XBMC / KODI</string>
 

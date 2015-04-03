@@ -705,8 +705,8 @@ if mode == 'main' or mode == 'folder':
         xbmcplugin.endOfDirectory(plugin_handle)
 
     if folderName == '':
-        addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','[Friends]')
-        addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','[Latest Feed]')
+        addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','['+addon.getLocalizedString(30091)+']')
+        addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','['+addon.getLocalizedString(30092)+']')
 
     mediaItems = service.getMediaList(folderName,0)
 

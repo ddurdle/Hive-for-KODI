@@ -101,6 +101,14 @@ class hive(cloudservice):
         except:
             self.isPremium = True
 
+        # hive specific ***
+        self.loginType = 0
+        try:
+            self.loginType = int(self.addon.getSetting(self.instanceName+'_provider'))
+        except:
+            self.loginType = 0
+
+
         try:
             if self.isPremium:
                 self.skipUnwatchable = self.addon.getSetting('hide_unwatchable')
@@ -122,7 +130,10 @@ class hive(cloudservice):
         # hive specific ***
         #token?
         if (not self.authorization.loadToken(self.instanceName,addon, 'token')):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
 
         self.isLibrary = False
         try:
@@ -196,6 +207,52 @@ class hive(cloudservice):
         return
 
 
+
+    ##
+    # perform login
+    ##
+    def login_Google(self):
+
+        self.authorization.isUpdated = True
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
+        opener.addheaders = [('User-Agent', self.user_agent)]
+
+        url = 'https://accounts.google.com/o/oauth2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fplus.login%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=google&response_type=code&client_id=45190457022.apps.googleusercontent.com&access_type=offline&requestvisibleactions=https%3A%2F%2Fschemas.google.com%2FAddActivity&redirect_uri=http://login.hive.im/'
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+
+        for cookie in self.cookiejar:
+            for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
+                        str(cookie), re.DOTALL):
+                cookieType,cookieValue = r.groups()
+
+        for r in re.finditer('\"(token)\"\:\"([^\"]+)\"',
+                             response_data, re.DOTALL):
+            tokenName,tokenValue = r.groups()
+            self.authorization.setToken(tokenName,tokenValue)
+
+        if (tokenValue == ''):
+            xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),'tokenValue')
+            self.crashreport.sendError('login:tokenValue',response_data)
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+ 'tokenValue', xbmc.LOGERROR)
+            return
+
+
+        return
+
     ##
     # return the appropriate "headers" for onedrive requests that include 1) user agent, 2) authorization cookie
     #   returns: list containing the header
@@ -238,7 +295,10 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -296,7 +356,10 @@ class hive(cloudservice):
 
           #maybe authorization key expired?
           except urllib2.URLError, e:
-                self.login()
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
 
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
@@ -488,7 +551,11 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
+
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -511,7 +578,10 @@ class hive(cloudservice):
                 response = opener.open(request,  'limit=50&term='+searchText)
 
         except urllib2.URLError, e:
-                self.login()
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
 
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
@@ -592,7 +662,10 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -617,7 +690,10 @@ class hive(cloudservice):
             response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
-                self.login()
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
 
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
@@ -660,7 +736,10 @@ class hive(cloudservice):
             response = opener.open(request, 'hiveId='+package.file.id)
 
         except urllib2.URLError, e:
-                self.login()
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
 
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
@@ -727,7 +806,11 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
+
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -746,7 +829,10 @@ class hive(cloudservice):
             open(file,'wb').write(urllib2.urlopen(req).read())
 
         except urllib2.URLError, e:
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
 
             tokenValue = self.authorization.getToken('token')
 
@@ -775,7 +861,10 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -797,8 +886,10 @@ class hive(cloudservice):
             response = opener.open(request)
 
         except urllib2.URLError, e:
-                self.login()
-
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
                 try:
@@ -830,8 +921,10 @@ class hive(cloudservice):
                 response = opener.open(request, 'filename=SAVED-FOLDER|'+str(folderID)+'|'+str(folderName)+'&parent='+str(saveFolderID)+'&locked=false&friends=')
 
             except urllib2.URLError, e:
-                self.login()
-
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
                 try:
@@ -851,7 +944,10 @@ class hive(cloudservice):
 
         #token not set?  try logging in; if still fail, report error
         if (tokenValue == ''):
-            self.login()
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
             tokenValue = self.authorization.getToken('token')
 
             if (tokenValue == ''):
@@ -873,16 +969,19 @@ class hive(cloudservice):
             response = opener.open(request)
 
         except urllib2.URLError, e:
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
                 self.login()
 
-                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
-                request = urllib2.Request(url)
-                try:
-                    response = opener.open(request, 'hiveId='+package.file.id)
-                except urllib2.URLError, e:
-                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
-                    self.crashreport.sendError('createBookmark',str(e))
-                    return
+            opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+            request = urllib2.Request(url)
+            try:
+                response = opener.open(request, 'hiveId='+package.file.id)
+            except urllib2.URLError, e:
+                xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                self.crashreport.sendError('createBookmark',str(e))
+                return
 
         response_data = response.read()
         response.close()
@@ -906,8 +1005,10 @@ class hive(cloudservice):
                 response = opener.open(request, 'filename=SAVED-SEARCH|'+str(searchCriteria)+'&parent='+str(saveFolderID)+'&locked=false&friends=')
 
             except urllib2.URLError, e:
-                self.login()
-
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
                 opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
                 request = urllib2.Request(url)
                 try:
