@@ -707,6 +707,17 @@ if mode == 'main' or mode == 'folder':
     if folderName == '':
         addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FRIENDS','['+addon.getLocalizedString(30091)+']')
         addMenu(PLUGIN_URL+'?mode=folder&instance='+instanceName+'&directory=FEED','['+addon.getLocalizedString(30092)+']')
+        mediaItems = service.getCollections()
+        if mediaItems:
+            for item in mediaItems:
+
+                try:
+                    if item.file is None:
+                        addDirectory(service, item.folder)
+                    else:
+                        addMediaFile(service, item)
+                except:
+                    addMediaFile(service, item)
 
     mediaItems = service.getMediaList(folderName,0)
 

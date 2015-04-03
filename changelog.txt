@@ -1,3 +1,6 @@
+Version 0.4.0
+- add: Google account login (no support for two-factor authentication, contact me to request support)
+- Hive 2.0 new features (My Collections, Favorites, Enjoy Later, Recently Played, Media Stream)
 Version 0.3.1
 - fix: create directories of STRM on network paths
 - fix: playback of STRM files without username/instancename when multiple accounts are defined

@@ -215,7 +215,7 @@ class hive(cloudservice):
 
         self.authorization.isUpdated = True
 
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar),MyHTTPErrorProcessor )
         opener.addheaders = [('User-Agent', self.user_agent)]
 
         url = 'https://accounts.google.com/o/oauth2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fplus.login%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=google&response_type=code&client_id=45190457022.apps.googleusercontent.com&access_type=offline&requestvisibleactions=https%3A%2F%2Fschemas.google.com%2FAddActivity&redirect_uri=http://login.hive.im/'
@@ -238,6 +238,124 @@ class hive(cloudservice):
             for r in re.finditer(' ([^\=]+)\=([^\s]+)\s',
                         str(cookie), re.DOTALL):
                 cookieType,cookieValue = r.groups()
+
+        url = ''
+        for r in re.finditer('The (document) has moved \<A HREF\=\"([^\"]+)\"' ,response_data, re.DOTALL):
+                document,url = r.groups()
+                url = re.sub('\&amp\;', '&',url)
+
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+        GALX = ''
+        for r in re.finditer('\<input name\=\"(GALX)\" type\=\"hidden\"\n?\s+value\=\"([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,GALX = r.groups()
+
+        continueURL = ''
+        for r in re.finditer('\<input name\=\"(continue)\" type\=\"hidden\"\n?\s+value\=\"([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,continueURL = r.groups()
+
+        shdf = ''
+        for r in re.finditer('\<input name\=\"(shdf)\" type\=\"hidden\"\n?\s+value\=\"([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,shdf = r.groups()
+
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request,'GALX='+GALX+'&continue='+continueURL+'&service=lso&ltmpl=popup&shdf='+shdf+'&scc=1&sarp=1&checkedDomains=youtube&checkConnection=youtube%3A1877%3A1&pstMsg=1&_utf8=%E2%98%83&bgresponse=%21vr1CtoaYkYtX9QZEtJkO4_-eZbsCAAAAIlIAAAAGKgD8KIryUXbwbxMU9wdYZQgs0NFaQBH8Xh6M1pCC-ox8EpkBpUsMeH5SnSsKvf5z3div4gY9qxbt_ieE8xPTjyUz8_HcugCmSbTSD4-wku2IkbF7T_BtlxC1Gog3KcQT4kMkCytzi9V_NiL6KUhKOPAruSbcEIb56h6M3VQBFP9wqHcFomv-wHPcL8ywZ3UWSiw0LNJeCzkHwAGDtfRxFfYhG4nSMYsCVWTjemdszsEjjy_Pdv8QtAd3I2Z0d8Rh1G_0jix1FXcMegOd5iAMLjWg3ldwlvI4MDrKnUqSTH1E64Qo_K4plyZBhPUdtBbRBEF7tRwbJ9V40ZwRMvUb&pstMsg=1&dnConn=&checkConnection=youtube%3A62%3A1&checkedDomains=youtube&Email='+self.authorization.username+'&Passwd='+self.addon.getSetting(self.instanceName+'_password')+'&signIn=Sign+in&PersistentCookie=yes')
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+        for r in re.finditer('(content)\=\"4\;url\=([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,url = r.groups()
+                url = re.sub('\&amp\;', '&',url)
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+        for r in re.finditer('(The document has moved) \<A HREF\=\"([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,url = r.groups()
+                url = re.sub('\&amp\;', '&',url)
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+        # try login
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
+
+        for r in re.finditer('(The document has moved) \<A HREF\=\"([^\"]+)\"\>' ,response_data, re.DOTALL):
+                document,url = r.groups()
+                url = re.sub('\&amp\;', '&',url)
+
+        opener.addheaders = [('Cookie', 'redirect_uri=https%3A%2F%2Ftouch.hive.im')]
+
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+
+        # try login
+        try:
+            response = opener.open(request)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.info().getheader('Location')
+        response.close()
+
+        googleToken = ''
+        for r in re.finditer('(google_token)\/(.*)' ,response_data, re.DOTALL):
+                document,googleToken = r.groups()
+
+        url = 'https://api.hive.im/api/user/sign-in/'
+        request = urllib2.Request(url)
+        self.cookiejar.add_cookie_header(request)
+
+
+        # try login
+        try:
+            response = opener.open(request,'provider=googleplus&accessToken='+googleToken)
+
+        except urllib2.URLError, e:
+            xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+            return
+        response_data = response.read()
+        response.close()
 
         for r in re.finditer('\"(token)\"\:\"([^\"]+)\"',
                              response_data, re.DOTALL):
@@ -537,6 +655,78 @@ class hive(cloudservice):
             loop = True
         return mediaFiles
 
+
+    ##
+    # retrieve a list of videos, using playback type stream
+    #   parameters: prompt for video quality (optional), cache type (optional)
+    #   returns: list of videos
+    ##
+    def getCollections(self):
+
+        tokenValue = self.authorization.getToken('token')
+
+
+        #token not set?  try logging in; if still fail, report error
+        if (tokenValue == ''):
+            if (self.loginType == 1):
+                self.login_Google()
+            else:
+                self.login()
+
+            tokenValue = self.authorization.getToken('token')
+
+            if (tokenValue == ''):
+                  xbmcgui.Dialog().ok(self.addon.getLocalizedString(30000), self.addon.getLocalizedString(30049), self.addon.getLocalizedString(30050),+'tokenValue')
+                  self.crashreport.sendError('getMediaList:tokenValue',response_data)
+                  xbmc.log(self.addon.getAddonInfo('name') + ': ' + self.addon.getLocalizedString(30050)+'tokenValue', xbmc.LOGERROR)
+                  return
+
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
+        opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+
+        url = 'https://api.hive.im/api/collection/list/'
+
+        request = urllib2.Request(url)
+
+        # if action fails, validate login
+
+        try:
+                response = opener.open(request,  'offset=0&limit=20&sort=desc&order=dateModified')
+
+        except urllib2.URLError, e:
+                if (self.loginType == 1):
+                    self.login_Google()
+                else:
+                    self.login()
+
+                opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
+                request = urllib2.Request(url)
+                try:
+                    response = opener.open(request, 'offset=0&limit=20&sort=desc&order=dateModified')
+                except urllib2.URLError, e:
+                    xbmc.log(self.addon.getAddonInfo('name') + ': ' + str(e), xbmc.LOGERROR)
+                    self.crashreport.sendError('getCollections',str(e))
+                    return
+
+        response_data = response.read()
+        response.close()
+
+
+        mediaFiles = []
+
+        # parsing page for files
+#        for r in re.finditer('\{\"id\"\:.*?\"dateModified\"\:\"[^\"]+\"\}' ,response_data, re.DOTALL):
+        for r in re.finditer('\{\"collectionId\"\:.*?\d\}' ,response_data, re.DOTALL):
+            entry = r.group()
+
+            for q in re.finditer('\"collectionId\"\:\"([^\"]+)\".*?\"title\"\:\"([^\"]+)\"\,' ,entry, re.DOTALL):
+                    collectionID,collectionName = q.groups()
+                    collectionName = urllib.quote(collectionName)
+                    media = package.package(None,folder.folder(collectionID,'['+collectionName+']'))
+                    mediaFiles.append(media)
+
+        return mediaFiles
 
 
     ##
