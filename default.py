@@ -369,6 +369,8 @@ elif mode == 'buildstrm':
                         break
 
                     if count == max_count:
+                        #fallback on first defined account
+                        service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
                         break
                     count = count + 1
 
@@ -401,6 +403,8 @@ elif mode == 'buildstrm':
                         service.buildSTRM(path + '/'+username)
 
                     if count == max_count:
+                        #fallback on first defined account
+                        service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
                         break
                     count = count + 1
 
@@ -489,6 +493,8 @@ elif mode == 'createsearch':
                     except:
                         break
                     if count == max_count:
+                        #fallback on first defined account
+                        service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
                         break
                     count = count + 1
 
@@ -512,6 +518,9 @@ elif mode == 'createsearch':
                             break
 
                         if count == max_count:
+                            #fallback on first defined account
+                            service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
+
                             break
                         count = count + 1
 
@@ -601,6 +610,8 @@ if numberOfAccounts > 1 and instanceName == '' and invokedUsername == '':
         except:
             break
         if count == max_count:
+            #fallback on first defined account
+            service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
             break
         count = count + 1
 
@@ -624,6 +635,8 @@ else:
                 break
 
             if count == max_count:
+                #fallback on first defined account
+                service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
                 break
             count = count + 1
 
@@ -679,6 +692,8 @@ else:
                 break
 
             if count == max_count:
+                #fallback on first defined account
+                service = hive.hive(PLUGIN_URL,addon,PLUGIN_NAME+'1', user_agent)
                 break
             count = count + 1
 

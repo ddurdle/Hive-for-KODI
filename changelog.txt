@@ -1,3 +1,4 @@
+- add: fallback service exception
 Version 0.4.0
 - issue: support google login #7
 - add: Google account login (no support for two-factor authentication, contact me to request support)
