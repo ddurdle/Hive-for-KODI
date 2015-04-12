@@ -323,8 +323,6 @@ elif mode == 'buildstrm':
 
         if url != '':
 
-#                filename = xbmc.translatePath(os.path.join(path, title+'.strm'))
-#                strmFile = open(filename, "w")
                 filename = path + '/' + title+'.strm'
                 strmFile = xbmcvfs.File(filename, "w")
 
