@@ -107,6 +107,7 @@
 -->
     </category>
 
+
     <category label="30065">
         <setting label="30066" type="lsep"/>
         <setting id="context_photo" type="enum" subsetting="true" label="30068" values="Photos only|Music and Photos|Everything" default="0"/>
