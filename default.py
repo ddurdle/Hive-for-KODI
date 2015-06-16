@@ -1,5 +1,5 @@
 '''
-    Hive XBMC Plugin
+    Hive for XBMC Plugin
     Copyright (C) 2013-2014 ddurdle
 
     This program is free software: you can redistribute it and/or modify
