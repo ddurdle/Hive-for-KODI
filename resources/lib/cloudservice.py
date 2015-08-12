@@ -122,7 +122,7 @@ class cloudservice(object):
 
                 if url != 0:
                     title = item.file.title
-                    title = re.sub('%20', ' ', title)
+                    title = urllib.unquote(title)
 
                     if not xbmcvfs.exists(path + title+'.strm'):
                         filename = path + '/' + title+'.strm'

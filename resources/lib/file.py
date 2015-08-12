@@ -31,7 +31,7 @@ class file:
 
     ##
     ##
-    def __init__(self, id, title, plot, type, fanart,thumbnail, date='', size=0):
+    def __init__(self, id, title, plot, type, fanart,thumbnail, date='', size=0, resolution=''):
         self.id = id
         self.title = title
         self.plot = plot
@@ -42,6 +42,7 @@ class file:
         self.isEncoded = False
         self.date = date
         self.size = size
+        self.resolution = resolution
 
     def setAlbumMeta(self,album,artist,releaseDate,trackNumber,genre):
         self.album = album
