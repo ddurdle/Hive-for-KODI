@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.hive" version="0.4.1" name="Hive" provider-name="ddurdle">
+<addon id="plugin.video.bitbase" version="0.5.1" name="BitBase" provider-name="ddurdle">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
     </requires>
@@ -7,8 +7,8 @@
         <provides>video audio</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary>Plays video and music from your Hive (QVIVO service) service</summary>
-        <description>Plays video and music from your Hive cloud service. This addon is not affiliated with QVIVO</description>
+        <summary>Plays video and music from your BitBase (Hive/QVIVO service) service</summary>
+        <description>Plays video and music from your BitBase cloud service. This addon is not affiliated with BitBase/Hive/QVIVO</description>
         <platform>all</platform>
     </extension>
 </addon>

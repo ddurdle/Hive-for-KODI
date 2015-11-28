@@ -1,5 +1,5 @@
 '''
-    Hive for XBMC Plugin
+    BitBase/Hive for XBMC Plugin
     Copyright (C) 2013-2014 ddurdle
 
     This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ import re
 import xbmcvfs
 
 # global variables
-PLUGIN_NAME = 'hive'
+PLUGIN_NAME = 'bitbase'
 
 
 
@@ -174,7 +174,7 @@ PLUGIN_URL = sys.argv[0]
 plugin_handle = int(sys.argv[1])
 plugin_queries = parse_query(sys.argv[2][1:])
 
-addon = xbmcaddon.Addon(id='plugin.video.hive')
+addon = xbmcaddon.Addon(id='plugin.video.bitbase')
 
 addon_dir = xbmc.translatePath( addon.getAddonInfo('path') )
 
@@ -560,7 +560,7 @@ elif mode == 'createsearch':
                 service
             except NameError:
                 xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-                log(addon.getLocalizedString(30050)+ 'hive-login', True)
+                log(addon.getLocalizedString(30050)+ 'bitbase-login', True)
                 xbmcplugin.endOfDirectory(plugin_handle)
 
             service.createSearch(searchText)
@@ -769,7 +769,7 @@ elif mode == 'search':
         service
     except NameError:
         xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-        log(addon.getLocalizedString(30050)+ 'hive-login', True)
+        log(addon.getLocalizedString(30050)+ 'bitbase-login', True)
         xbmcplugin.endOfDirectory(plugin_handle)
 
 
@@ -810,7 +810,7 @@ elif mode == 'video' or mode == 'audio':
         service
     except NameError:
         xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-        log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
+        log(aaddon.getLocalizedString(30050)+ 'bitbase-login', True)
         xbmcplugin.endOfDirectory(plugin_handle)
 
     playbackType = 0
@@ -922,7 +922,7 @@ elif mode == 'requestencoding':
             service
     except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-            log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
+            log(aaddon.getLocalizedString(30050)+ 'bitbase-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
     mediaFile = file.file(filename, title, '', 0, '','')
@@ -949,7 +949,7 @@ elif mode == 'photo':
             service
     except NameError:
             xbmcgui.Dialog().ok(addon.getLocalizedString(30000), addon.getLocalizedString(30051), addon.getLocalizedString(30052), addon.getLocalizedString(30053))
-            log(aaddon.getLocalizedString(30050)+ 'hive-login', True)
+            log(aaddon.getLocalizedString(30050)+ 'bitbase-login', True)
             xbmcplugin.endOfDirectory(plugin_handle)
 
 

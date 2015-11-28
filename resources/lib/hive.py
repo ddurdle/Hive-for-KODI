@@ -1,5 +1,5 @@
 '''
-    Hive XBMC Plugin
+    BitBase/Hive XBMC Plugin
     Copyright (C) 2013-2014 ddurdle
 
     This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ import unicodedata
 
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
-addon = xbmcaddon.Addon(id='plugin.video.hive')
+addon = xbmcaddon.Addon(id='plugin.video.bitbase')
 addon_dir = xbmc.translatePath( addon.getAddonInfo('path') )
 
 import sys
@@ -50,7 +50,7 @@ import crashreport
 import gSpreadsheets
 
 #global variables
-PLUGIN_NAME = 'hive'
+PLUGIN_NAME = 'bitbase'
 PLUGIN_URL = sys.argv[0]
 
 
@@ -171,7 +171,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar), MyHTTPErrorProcessor)
         opener.addheaders = [('User-Agent', self.user_agent)]
 
-        url = 'https://api.hive.im/api/user/sign-in/'
+        url = 'https://api.bitba.se/api/user/sign-in/'
 
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
@@ -342,7 +342,7 @@ class hive(cloudservice):
         for r in re.finditer('(google_token)\/(.*)' ,response_data, re.DOTALL):
                 document,googleToken = r.groups()
 
-        url = 'https://api.hive.im/api/user/sign-in/'
+        url = 'https://api.bitba.se/api/user/sign-in/'
         request = urllib2.Request(url)
         self.cookiejar.add_cookie_header(request)
 
@@ -435,13 +435,13 @@ class hive(cloudservice):
 
 
         if folderName=='' or userID != '':
-            url = 'https://api.hive.im/api/hive/get/'
-        elif folderName=='FRIENDS':
-            url = 'https://api.hive.im/api/user/get-friends-list/'
-        elif folderName=='FEED':
-            url = 'https://api.hive.im/api/activity/get/'
+            url = 'https://api.bitba.se/api/file/get/'
+#        elif folderName=='FRIENDS':
+#            url = 'https://api.bitba.se/api/user/get-friends-list/'
+#        elif folderName=='FEED':
+#            url = 'https://api.bitba.se/api/activity/get/'
         else:
-            url = 'https://api.hive.im/api/hive/get-children/'
+            url = 'https://api.bitba.se/api/file/get-children/'
 
         request = urllib2.Request(url)
 
@@ -685,7 +685,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api.hive.im/api/collection/list/'
+        url = 'https://api.bitba.se/api/collection/list/'
 
         request = urllib2.Request(url)
 
@@ -758,7 +758,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api.hive.im/api/search/hive/ '
+        url = 'https://api.bitba.se/api/search/hive/ '
 
         request = urllib2.Request(url)
 
@@ -869,7 +869,7 @@ class hive(cloudservice):
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
 
-        url = 'https://api.hive.im/api/hive/get-streams/'
+        url = 'https://api.bitba.se/api/hive/get-streams/'
 
 
         request = urllib2.Request(url)
@@ -915,7 +915,7 @@ class hive(cloudservice):
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
 
-        url = 'https://api.hive.im/api/hive/get-child/'
+        url = 'https://api.bitba.se/api/hive/get-child/'
 
 
         request = urllib2.Request(url)
@@ -1066,7 +1066,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api.hive.im/api/hive/get/'
+        url = 'https://api.bitba.se/api/file/get/'
 
         request = urllib2.Request(url)
 
@@ -1101,7 +1101,7 @@ class hive(cloudservice):
                     saveFolderID,saveFolderName = q.groups()
 
         if saveFolderID != 0:
-            url = 'https://api.hive.im/api/hive/create/'
+            url = 'https://api.bitba.se/api/file/create/'
 
             request = urllib2.Request(url)
 
@@ -1149,7 +1149,7 @@ class hive(cloudservice):
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookiejar))
         opener.addheaders = [('User-Agent', self.user_agent),('Client-Version','0.1'),('Authorization', tokenValue), ('Client-Type', 'Browser'), ('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')]
 
-        url = 'https://api.hive.im/api/hive/get/'
+        url = 'https://api.bitba.se/api/file/get/'
 
         request = urllib2.Request(url)
 
@@ -1185,7 +1185,7 @@ class hive(cloudservice):
                     saveFolderID,saveFolderName = q.groups()
 
         if saveFolderID != 0:
-            url = 'https://api.hive.im/api/hive/create/'
+            url = 'https://api.bitba.se/api/file/create/'
 
             request = urllib2.Request(url)
 
