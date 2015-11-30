@@ -1,4 +1,5 @@
 - fix: rebranded to BitBase
+
 Version 0.4.1
 - fix: when generating multiple STRMs, decode %xx
 - add: fallback service exception
